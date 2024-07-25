@@ -1,7 +1,7 @@
-import { procedure, router } from "../trpc";
+import { publicProcedure, router } from "../trpc";
 
 export const testRouter = router({
-    getTest: procedure.query(async () => {
+    getTest: publicProcedure.query(async () => {
         return [35, 64, 31]
     })
 })

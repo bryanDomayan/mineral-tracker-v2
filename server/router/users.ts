@@ -1,8 +1,8 @@
-import { procedure, router } from "../trpc";
-import { prisma } from "@/lib/prisma";
+import { authProcedure, publicProcedure, router } from "../trpc";
 
 export const usersRouter = router({
-    getUsers: procedure.query(async () => {
-        return await prisma.users.findMany()
+    getUsers: authProcedure.query(async ({ ctx, input }) => {
+        console.log(ctx.req)
+        return await ctx.prisma.users.findMany()
     })
 })
