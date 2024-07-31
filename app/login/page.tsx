@@ -22,7 +22,7 @@ export default function LoginPage() {
         console.log('====================================');
         console.log(data);
         console.log('====================================');
-        router.push('/dashboard')
+        router.push('/statistic')
     }
 
     return (
