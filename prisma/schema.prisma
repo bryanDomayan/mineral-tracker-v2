@@ -19,5 +19,74 @@ model Users {
     lastName      String?
     email         String          @unique
     password      String
+    userType      UserType?       @default(USER)
     createdAt     DateTime        @default(now())
+    departmentId  Int?
+    Department    Departments?    @relation(fields: [departmentId], references: [id])
+    Minerals      Minerals[]
+    Consumes      Consumes[]
+}
+
+model Departments {
+    id            Int             @id             @default(autoincrement())
+    name          String
+    information   String?
+    logoPath      String?
+    Csers         Users[]
+    Consumes      Consumes[]
+}
+
+model Minerals {
+    id                  Int                 @id             @default(autoincrement())
+    name                String
+    brand               String?             
+    description         String?
+    size                String?
+    createdAt           DateTime            @default(now())
+    userId              Int?
+    User                Users?              @relation(fields: [userId], references: [id])  
+    ConsumeMinerals     ConsumeMinerals[]
+}
+
+model Consumes {
+    id                      Int                     @id             @default(autoincrement())
+    userId                  Int
+    departmentId            Int
+    note                    String?
+    avgTempId               Int?
+    createdAt               DateTime                @default(now())
+    User                    Users                   @relation(fields: [userId], references: [id])
+    Department              Departments             @relation(fields: [departmentId], references: [id])
+    AverageTemperatures     AverageTemperatures?    @relation(fields: [avgTempId], references: [id])
+    ConsumeMinerals         ConsumeMinerals[]
+}
+
+model ConsumeMinerals {
+    id            Int             @id             @default(autoincrement())
+    consumeId     Int
+    mineralId     Int?
+    amount        Int
+    Consume       Consumes        @relation(fields: [consumeId], references: [id])
+    Mineral       Minerals?       @relation(fields: [mineralId], references: [id])
+}
+
+model Temperatures {
+    id                      Int                     @id             @default(autoincrement())
+    temp                    String
+    createdAt               DateTime                @default(now())
+    avgTempId               Int?
+    AverageTemperature      AverageTemperatures?    @relation(fields: [avgTempId], references: [id])
+}
+
+model AverageTemperatures {
+    id              Int             @id             @default(autoincrement())
+    average         String
+    createdAt       DateTime        @default(now())
+    Consumes        Consumes[]
+    Temperatures    Temperatures[]
+}
+
+enum UserType {
+    ADMIN
+    USER
 }

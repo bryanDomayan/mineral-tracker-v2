@@ -1,11 +1,13 @@
 "use client"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
 export default function LoginPage() {
-    const [email, setEmail] = useState<string>("")
-    const [password, setPassword] = useState<string>("")
+    const router = useRouter()
+    const [email, setEmail] = useState<string>("mark@test.com")
+    const [password, setPassword] = useState<string>("123123123")
     const [loading, setLoading] = useState<boolean>(false)
 
     const handleLogin = async () => {
@@ -16,9 +18,11 @@ export default function LoginPage() {
             body: JSON.stringify({email, password})
         })
         const data = await res.json()
+        setLoading(false)
         console.log('====================================');
         console.log(data);
         console.log('====================================');
+        router.push('/dashboard')
     }
 
     return (
@@ -27,11 +31,11 @@ export default function LoginPage() {
                 <h3 className='text-2xl font-medium'>Login</h3>
                 <div>
                     <p>Email</p>
-                    <Input onChange={(e) => setEmail(e.target.value)} placeholder='Type your email' />
+                    <Input onChange={(e) => setEmail(e.target.value)} value={email} placeholder='Type your email' />
                 </div>
                 <div>
                     <p>Password</p>
-                    <Input onChange={(e) => setPassword(e.target.value)} placeholder='Type your password' type='password' />
+                    <Input onChange={(e) => setPassword(e.target.value)} value={password} placeholder='Type your password' type='password' />
                 </div>
                 <div className='pt-2'>
                     <Button disabled={loading} onClick={handleLogin} className='w-full'>Login</Button>
