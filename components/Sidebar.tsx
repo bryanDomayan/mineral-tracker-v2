@@ -21,7 +21,7 @@ export default function Sidebar() {
     // },
 
     {
-      name: "dashboard",
+      name: "Dashboard",
       path: "/dashboard",
       icon: Users,
     },
