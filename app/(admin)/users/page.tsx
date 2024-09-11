@@ -85,45 +85,56 @@ const invoices = [
   },
 ];
 
-export default function DepartmentPage() {
+export default function UsersPage() {
   const [position, setPosition] = useState("bottom");
 
   return (
     <div className=" flex  w-full h-screen items-center justify-center px-10 flex-col">
       <div className=" w-full items-center   flex  justify-between p-10 pl-4 mb-20">
         <p className="  text-teal-700  font-bold shadow-sm drop-shadow-sm  underline-offset-1 underline text-3xl">
-          Department
+          User Management
         </p>
         <Popover>
           <PopoverTrigger asChild>
-            <Button className=" bg-gray-700">Add Department</Button>
+            <Button className=" bg-gray-700">Add Users</Button>
           </PopoverTrigger>
           <PopoverContent className="w-96">
             <div className="grid gap-4">
               <div className="space-y-2">
-                <h4 className="font-medium leading-none"> Add Department</h4>
+                <h4 className="font-medium leading-none"> Add users</h4>
               </div>
               <div className="grid gap-2">
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="width"> Name</Label>
+                  <Label htmlFor="width"> firstname:</Label>
                   <Input id="width" className="col-span-2 h-8" />
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="maxWidth">Description</Label>
-                  <Textarea
-                    id="maxWidth"
-                    className="col-span-2    h-16  overflow-scroll"
-                    placeholder=" description of deparment"
-                  />
+                  <Label htmlFor="width"> lastname:</Label>
+                  <Input id="width" className="col-span-2 h-8" />
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="height">Logo url</Label>
-                  <Input
-                    id="height"
-                    placeholder=" https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTR3tl0kaO56KpCEWQJeNfk6pgwGKBoEVvXA&s"
-                    className="col-span-2 h-8"
-                  />
+                  <Label htmlFor="width"> email:</Label>
+                  <Input id="width" className="col-span-2 h-8" />
                 </div>
+
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label htmlFor="width"> assign :</Label>
+
+                  <Select>
+                    <SelectTrigger className="w-[230px]">
+                      <SelectValue placeholder="filter department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>list of departments</SelectLabel>
+                        <SelectItem value="apple">CCIS</SelectItem>
+                        <SelectItem value="banana">CET</SelectItem>
+                        <SelectItem value="blueberry">CAT</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className=" w-full flex  justify-end p-3  bg">
                   <Button
                     id="maxHeight"
@@ -138,22 +149,35 @@ export default function DepartmentPage() {
           </PopoverContent>
         </Popover>
       </div>
-
       <div className=" w-full items-start   flex  justify-start gap-5  pt-0 pl-4  py-4">
         <Input
           placeholder="search  users"
-          className="  w-48 border  border-teal-700 text-teal-700 "
+          className="  w-48 border  border-teal-700  border-tea-700 "
         />
+        <Select>
+          <SelectTrigger className="w-[180px]  text-xs">
+            <SelectValue placeholder="filter department" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>list of departments</SelectLabel>
+              <SelectItem value="ALL">ALL</SelectItem>
+              <SelectItem value="CCIS">CCIS</SelectItem>
+              <SelectItem value="CET">CET</SelectItem>
+              <SelectItem value="CAT">CAT</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
       <Table>
         <TableCaption className=" mt-20">A list of Deparment.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className=""> name</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead></TableHead>
-
-            <TableHead>Action</TableHead>
+            <TableHead className=""> Firstname</TableHead>
+            <TableHead>Lastname</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Departments</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -161,11 +185,11 @@ export default function DepartmentPage() {
             <TableRow key={invoice.invoice}>
               <TableCell className="font-medium">{invoice.invoice}</TableCell>
               <TableCell>{invoice.paymentStatus}</TableCell>
-              <TableCell></TableCell>
+              <TableCell>{invoice.paymentStatus}</TableCell>
+              <TableCell>{invoice.paymentStatus}</TableCell>
 
               <TableCell>
                 <div className=" flex  gap-4">
-                  <Button className=" bg-teal-700">Manage users</Button>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button className=" bg-orange-300">Edit</Button>
@@ -175,31 +199,41 @@ export default function DepartmentPage() {
                         <div className="space-y-2">
                           <h4 className="font-medium leading-none">
                             {" "}
-                            Add Department
+                            Add users
                           </h4>
-                          <p className="text-sm text-muted-foreground"></p>
                         </div>
                         <div className="grid gap-2">
                           <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="width"> Name</Label>
+                            <Label htmlFor="width"> firstname:</Label>
                             <Input id="width" className="col-span-2 h-8" />
                           </div>
                           <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="maxWidth">Description</Label>
-                            <Textarea
-                              id="maxWidth"
-                              className="col-span-2    h-16  overflow-scroll"
-                              placeholder=" description of deparment"
-                            />
+                            <Label htmlFor="width"> lastname:</Label>
+                            <Input id="width" className="col-span-2 h-8" />
                           </div>
                           <div className="grid grid-cols-3 items-center gap-4">
-                            <Label htmlFor="height">Logo url</Label>
-                            <Input
-                              id="height"
-                              placeholder=" https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTR3tl0kaO56KpCEWQJeNfk6pgwGKBoEVvXA&s"
-                              className="col-span-2 h-8"
-                            />
+                            <Label htmlFor="width"> email:</Label>
+                            <Input id="width" className="col-span-2 h-8" />
                           </div>
+
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="width"> assign:</Label>
+
+                            <Select>
+                              <SelectTrigger className="w-[230px]">
+                                <SelectValue placeholder="Select a department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>list of departments</SelectLabel>
+                                  <SelectItem value="apple">CCIS</SelectItem>
+                                  <SelectItem value="banana">CET</SelectItem>
+                                  <SelectItem value="blueberry">CAT</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
                           <div className=" w-full flex  justify-end p-3  bg">
                             <Button
                               id="maxHeight"
@@ -213,6 +247,7 @@ export default function DepartmentPage() {
                       </div>
                     </PopoverContent>
                   </Popover>
+
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button className=" bg-red-400">Delete</Button>
