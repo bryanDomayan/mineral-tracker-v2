@@ -23,5 +23,6 @@ export const config = {
     matcher: [
         '/login', // public route
         '/statistic',
+        '/dashboard'
     ],
 }

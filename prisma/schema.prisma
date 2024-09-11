@@ -32,7 +32,7 @@ model Departments {
     name          String
     information   String?
     logoPath      String?
-    Csers         Users[]
+    Users         Users[]
     Consumes      Consumes[]
 }
 

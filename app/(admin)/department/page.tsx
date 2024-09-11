@@ -38,7 +38,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { create as createDept, get as getDept } from "@/actions/department";
 
 const invoices = [
   {
@@ -88,6 +89,38 @@ const invoices = [
 export default function DepartmentPage() {
   const [position, setPosition] = useState("bottom");
 
+  const [data, setData] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [formData, setFormData] = useState({
+    name: "",
+    information: "",
+    logoPath: ""
+  })
+
+  const fetchData = async () => {
+    const data = await getDept()
+    console.log(data)
+    setData(data)
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const handleFieldChange = (val: string, field: string) => {
+    setFormData((prevState) => ({
+        ...prevState,
+        [field]: val
+    }))
+  }
+
+  const handleCreate = async () => {
+    setLoading(true)
+    await createDept(formData)
+    setLoading(false)
+    fetchData()
+  }
+
   return (
     <div className=" flex  w-full h-screen items-center justify-center px-10 flex-col">
       <div className=" w-full items-center   flex  justify-between p-10 pl-4 mb-20">
@@ -106,12 +139,14 @@ export default function DepartmentPage() {
               <div className="grid gap-2">
                 <div className="grid grid-cols-3 items-center gap-4">
                   <Label htmlFor="width"> Name</Label>
-                  <Input id="width" className="col-span-2 h-8" />
+                  <Input id="width" onChange={(e) => handleFieldChange(e.target.value, 'name')} value={formData.name} className="col-span-2 h-8" />
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <Label htmlFor="maxWidth">Description</Label>
                   <Textarea
                     id="maxWidth"
+                    onChange={(e) => handleFieldChange(e.target.value, 'information')} 
+                    value={formData.information}
                     className="col-span-2    h-16  overflow-scroll"
                     placeholder=" description of deparment"
                   />
@@ -120,6 +155,8 @@ export default function DepartmentPage() {
                   <Label htmlFor="height">Logo url</Label>
                   <Input
                     id="height"
+                    onChange={(e) => handleFieldChange(e.target.value, 'logoPath')} 
+                    value={formData.logoPath}
                     placeholder=" https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTR3tl0kaO56KpCEWQJeNfk6pgwGKBoEVvXA&s"
                     className="col-span-2 h-8"
                   />
@@ -127,10 +164,12 @@ export default function DepartmentPage() {
                 <div className=" w-full flex  justify-end p-3  bg">
                   <Button
                     id="maxHeight"
+                    onClick={handleCreate}
+                    disabled={loading}
                     defaultValue="none"
                     className="col-span-2 h-8 bg-teal-700 hover:bg-teal-600 "
                   >
-                    save changes
+                    {loading ? 'loading' : 'save changes'}
                   </Button>
                 </div>
               </div>
@@ -157,10 +196,10 @@ export default function DepartmentPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invoices.map((invoice) => (
-            <TableRow key={invoice.invoice}>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
-              <TableCell>{invoice.paymentStatus}</TableCell>
+          {data.map((d) => (
+            <TableRow key={d.id}>
+              <TableCell className="font-medium">{d?.name}</TableCell>
+              <TableCell>{d?.information}</TableCell>
               <TableCell></TableCell>
 
               <TableCell>
