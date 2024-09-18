@@ -1,28 +1,30 @@
 "use server";
-import { prisma } from "@/lib/prisma";
+import { Minerals, prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-interface DepartmentTypes {
+interface createMineralTypes {
+  userId?: number;
   name: string;
-  information?: string;
-  logoPath?: string;
+  brand?: string;
+  description?: string;
+  size?: string;
 }
 
-interface DepartmentId {
+interface menaralId {
   id: number;
 }
 
 // Fetch all departments
-export const get = async () => {
-  return await prisma.departments.findMany({
+export const getMineral = async () => {
+  return await prisma.minerals.findMany({
     orderBy: { id: "desc" },
   });
 };
 
 // Create a new department
-export const create = async (payload: DepartmentTypes, path?: string) => {
+export const create = async (payload: createMineralTypes, path?: string) => {
   try {
-    const data = await prisma.departments.create({
+    const data = await prisma.minerals.create({
       data: payload,
     });
 
@@ -37,11 +39,11 @@ export const create = async (payload: DepartmentTypes, path?: string) => {
 // Update an existing department
 export const update = async (
   id: number,
-  payload: DepartmentTypes,
+  payload: createMineralTypes,
   path?: string
 ) => {
   try {
-    const data = await prisma.departments.update({
+    const data = await prisma.minerals.update({
       where: { id },
       data: payload,
     });
@@ -55,9 +57,9 @@ export const update = async (
 };
 
 // Delete a department
-export const deleteDepartment = async (id: DepartmentId, path?: string) => {
+export const deleteDepartment = async (id: menaralId, path?: string) => {
   try {
-    const data = await prisma.departments.delete({
+    const data = await prisma.minerals.delete({
       where: { id: id.id },
     });
 
