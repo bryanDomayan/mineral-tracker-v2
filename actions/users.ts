@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/utils/password";
 import { revalidatePath } from "next/cache";
 
 interface userId {
@@ -50,6 +51,8 @@ export const deleteDepartment = async (id: userId, path?: string) => {
 
 export const create = async (payload: userType, path?: string) => {
   try {
+    const password = await hashPassword(payload.password as string)
+    payload.password = password
     const data = await prisma.users.create({
       data: payload,
     });
