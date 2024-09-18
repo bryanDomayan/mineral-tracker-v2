@@ -67,6 +67,8 @@ export const create = async (payload: userType, path?: string) => {
 
 export const update = async (id: number, payload: userType, path?: string) => {
   try {
+    const password = await hashPassword(payload.password as string)
+    payload.password = password
     const data = await prisma.users.update({
       where: { id },
       data: payload,

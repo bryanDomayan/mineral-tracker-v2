@@ -22,6 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { getMineral, create, update, deleteDepartment } from "@/actions/minerals";
+import { displaySize } from "@/utils/string";
 
 // Types
 interface Mineral {
@@ -214,7 +215,7 @@ export default function MineralsPage() {
               <TableCell className="font-medium">{mineral.name}</TableCell>
               <TableCell>{mineral.brand}</TableCell>
               <TableCell>{mineral.description}</TableCell>
-              <TableCell>{mineral.size}</TableCell>
+              <TableCell>{displaySize(mineral.size)}</TableCell>
               <TableCell>
                 <div className="flex gap-4">
                   <AlertDialog open={editMode && currentMineralId === mineral.id} onOpenChange={(open) => {

@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
     const token = cookies().get('serverToken')?.value
     if (path.startsWith('/login')) {
         if (token) {
-            return NextResponse.redirect(new URL("/statistic",request.url))
+            return NextResponse.redirect(new URL("/dashboard",request.url))
         }
         return NextResponse.next()
     }

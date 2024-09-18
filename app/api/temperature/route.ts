@@ -1,0 +1,7 @@
+export async function GET(req: Request) {
+    try {
+        // https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m
+    } catch (error) {
+        return Response.json(error, { status: 500 })
+    }
+}

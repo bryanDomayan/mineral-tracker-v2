@@ -15,14 +15,15 @@ export default function LoginPage() {
 
         const res = await fetch('/api/auth/login', {
             method: 'POST',
-            body: JSON.stringify({email, password})
+            body: JSON.stringify({email, password}),
+            cache: 'no-cache'
         })
         const data = await res.json()
         setLoading(false)
         console.log('====================================');
         console.log(data);
         console.log('====================================');
-        router.push('/statistic')
+        router.push('/dashboard')
     }
 
     return (
