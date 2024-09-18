@@ -2,17 +2,13 @@
 import { Minerals, prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-
 interface createMineralTypes {
-  userId?: number  
+  userId?: number;
   name: string;
   brand?: string;
   description?: string;
   size?: string;
-
-  
 }
-
 
 interface menaralId {
   id: number;
@@ -20,7 +16,7 @@ interface menaralId {
 
 // Fetch all departments
 export const getMineral = async () => {
-  return await prisma.users.findMany({
+  return await prisma.minerals.findMany({
     orderBy: { id: "desc" },
   });
 };
@@ -60,7 +56,6 @@ export const update = async (
   }
 };
 
-
 // Delete a department
 export const deleteDepartment = async (id: menaralId, path?: string) => {
   try {
@@ -75,6 +70,3 @@ export const deleteDepartment = async (id: menaralId, path?: string) => {
     return error;
   }
 };
-
-
-

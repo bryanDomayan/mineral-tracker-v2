@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,7 +20,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,10 +31,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { useEffect, useState } from "react"
-import { getUsers, create, update, deleteDepartment } from "@/actions/users"
-import { useToast } from "@/components/ui/use-toast"
+} from "@/components/ui/alert-dialog";
+import { useEffect, useState } from "react";
+import {
+  getUsers,
+  create,
+  update,
+  deleteDepartment,
+  getDepartmentOption,
+} from "@/actions/users";
+import { useToast } from "@/components/ui/use-toast";
+import { Departments } from "@prisma/client";
 
 enum UserType {
   ADMIN = "ADMIN",
@@ -42,113 +49,116 @@ enum UserType {
 }
 
 interface User {
-  id: number
-  firstName: string
-  lastName: string
-  email: string
-  userType: UserType
-  departmentId?: number
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: UserType;
+  departmentId?: number;
   Department?: {
-    name: string
-  }
+    name: string;
+  };
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
-  const [isAddOpen, setIsAddOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const { toast } = useToast()
+  const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Departments[]>([]);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { toast } = useToast();
 
   const fetchUsers = async () => {
     try {
-      const fetchedUsers = await getUsers()
-      setUsers(fetchedUsers as any)
+      const fetchedUsers = await getUsers();
+      setUsers(fetchedUsers as User[]);
+      const fetchedDepartments = await getDepartmentOption();
+      setDepartments(fetchedDepartments as Departments[]);
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to fetch users",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   const handleAdd = async (formData: FormData) => {
     try {
       const newUser = {
-        firstName: formData.get('firstName') as string,
-        lastName: formData.get('lastName') as string,
-        email: formData.get('email') as string,
+        firstName: formData.get("firstName") as string,
+        lastName: formData.get("lastName") as string,
+        email: formData.get("email") as string,
         userType: UserType.USER,
-        password: formData.get('password') as string,
-        departmentId: Number(formData.get('departmentId')),
-      }
-      await create(newUser, '/users')
-      setIsAddOpen(false)
-      fetchUsers()
+        password: "password",
+        departmentId: Number(formData.get("departmentId")),
+      };
+      await create(newUser);
+      setIsAddOpen(false);
+      fetchUsers();
       toast({
         title: "Success",
         description: "User added successfully",
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add user",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleEdit = async (formData: FormData) => {
-    if (!currentUser) return
+    if (!currentUser) return;
     try {
       const updatedUser = {
-        firstName: formData.get('firstName') as string,
-        lastName: formData.get('lastName') as string,
-        email: formData.get('email') as string,
+        firstName: formData.get("firstName") as string,
+        lastName: formData.get("lastName") as string,
+        email: formData.get("email") as string,
         userType: currentUser.userType,
-        password: formData.get('password') as string,
-        departmentId: Number(formData.get('departmentId')),
-      }
-      await update(currentUser.id, updatedUser, '/users')
-      setIsEditOpen(false)
-      fetchUsers()
+        password: "password",
+        departmentId: Number(formData.get("departmentId")),
+      };
+      await update(currentUser.id, updatedUser, "/users");
+      setIsEditOpen(false);
+      fetchUsers();
       toast({
         title: "Success",
         description: "User updated successfully",
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to update user",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (!currentUser) return
+    if (!currentUser) return;
     try {
-      await deleteDepartment({ id: currentUser.id }, '/users')
-      setIsDeleteOpen(false)
-      fetchUsers()
+      await deleteDepartment({ id: currentUser.id }, "/users");
+      setIsDeleteOpen(false);
+      fetchUsers();
       toast({
         title: "Success",
         description: "User deleted successfully",
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete user",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="flex w-full h-screen items-center justify-center px-10 flex-col">
@@ -167,49 +177,62 @@ export default function UsersPage() {
                 Fill in the details to add a new user.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              handleAdd(new FormData(e.currentTarget))
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAdd(new FormData(e.currentTarget));
+              }}
+            >
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="firstName" className="text-right">
                     First Name
                   </Label>
-                  <Input id="firstName" name="firstName" className="col-span-3" required />
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    className="col-span-3"
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="lastName" className="text-right">
                     Last Name
                   </Label>
-                  <Input id="lastName" name="lastName" className="col-span-3" required />
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    className="col-span-3"
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="email" className="text-right">
                     Email
                   </Label>
-                  <Input id="email" name="email" type="email" className="col-span-3" required />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="password" className="text-right">
-                    Password
-                  </Label>
-                  <Input id="password" name="password" type="password" className="col-span-3" required />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className="col-span-3"
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="departmentId" className="text-right">
                     Department
                   </Label>
-                  <Select name="departmentId">
+                  <Select name="departmentId" defaultValue="">
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>Departments</SelectLabel>
-                        <SelectItem value="1">CCIS</SelectItem>
-                        <SelectItem value="2">CET</SelectItem>
-                        <SelectItem value="3">CAT</SelectItem>
+                        <SelectLabel className=" w-72 text-xs">
+                          {departments.length === 0
+                            ? "all department assigned user please add another department"
+                            : "Departments"}{" "}
+                        </SelectLabel>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -234,11 +257,11 @@ export default function UsersPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>list of departments</SelectLabel>
-              <SelectItem value="ALL">ALL</SelectItem>
-              <SelectItem value="CCIS">CCIS</SelectItem>
-              <SelectItem value="CET">CET</SelectItem>
-              <SelectItem value="CAT">CAT</SelectItem>
+              {departments.map((dept) => (
+                <SelectItem key={dept.id} value={dept.id.toString()}>
+                  {dept.name}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -265,58 +288,95 @@ export default function UsersPage() {
                 <div className="flex gap-4">
                   <AlertDialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <AlertDialogTrigger asChild>
-                      <Button className="bg-orange-300" onClick={() => setCurrentUser(user)}>Edit</Button>
+                      <Button
+                        className="bg-yellow-500"
+                        onClick={() => setCurrentUser(user)}
+                      >
+                        Edit
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="sm:max-w-[425px]">
                       <AlertDialogHeader>
                         <AlertDialogTitle>Edit User</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Make changes to the user's information.
+                          Update user details.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <form onSubmit={(e) => {
-                        e.preventDefault()
-                        handleEdit(new FormData(e.currentTarget))
-                      }}>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleEdit(new FormData(e.currentTarget));
+                        }}
+                      >
                         <div className="grid gap-4 py-4">
                           <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-firstName" className="text-right">
+                            <Label htmlFor="firstName" className="text-right">
                               First Name
                             </Label>
-                            <Input id="edit-firstName" name="firstName" defaultValue={currentUser?.firstName} className="col-span-3" required />
+                            <Input
+                              id="firstName"
+                              name="firstName"
+                              defaultValue={currentUser?.firstName}
+                              className="col-span-3"
+                              required
+                            />
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-lastName" className="text-right">
+                            <Label htmlFor="lastName" className="text-right">
                               Last Name
                             </Label>
-                            <Input id="edit-lastName" name="lastName" defaultValue={currentUser?.lastName} className="col-span-3" required />
+                            <Input
+                              id="lastName"
+                              name="lastName"
+                              defaultValue={currentUser?.lastName}
+                              className="col-span-3"
+                              required
+                            />
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-email" className="text-right">
+                            <Label htmlFor="email" className="text-right">
                               Email
                             </Label>
-                            <Input id="edit-email" name="email" defaultValue={currentUser?.email} className="col-span-3" required />
+                            <Input
+                              id="email"
+                              name="email"
+                              type="email"
+                              defaultValue={currentUser?.email}
+                              className="col-span-3"
+                              required
+                            />
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-password" className="text-right">
-                              Password
-                            </Label>
-                            <Input id="edit-password" name="password" type="password" className="col-span-3" placeholder="Leave blank to keep current password" />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="edit-departmentId" className="text-right">
+                            <Label
+                              htmlFor="departmentId"
+                              className="text-right"
+                            >
                               Department
                             </Label>
-                            <Select name="departmentId" defaultValue={currentUser?.departmentId?.toString()}>
+                            <Select
+                              name="departmentId"
+                              defaultValue={
+                                currentUser?.departmentId?.toString() || ""
+                              }
+                            >
                               <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select department" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectGroup>
-                                  <SelectLabel>Departments</SelectLabel>
-                                  <SelectItem value="1">CCIS</SelectItem>
-                                  <SelectItem value="2">CET</SelectItem>
-                                  <SelectItem value="3">CAT</SelectItem>
+                                  <SelectLabel>
+                                    {departments.length === 0
+                                      ? "all department assigned user please add another department"
+                                      : "Departments"}{" "}
+                                  </SelectLabel>
+                                  {departments.map((dept) => (
+                                    <SelectItem
+                                      key={dept.id}
+                                      value={dept.id.toString()}
+                                    >
+                                      {dept.name}
+                                    </SelectItem>
+                                  ))}
                                 </SelectGroup>
                               </SelectContent>
                             </Select>
@@ -324,27 +384,40 @@ export default function UsersPage() {
                         </div>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction type="submit">Save Changes</AlertDialogAction>
+                          <AlertDialogAction type="submit">
+                            Update User
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </form>
                     </AlertDialogContent>
                   </AlertDialog>
-
-                  <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                  <AlertDialog
+                    open={isDeleteOpen}
+                    onOpenChange={setIsDeleteOpen}
+                  >
                     <AlertDialogTrigger asChild>
-                      <Button className="bg-red-400" onClick={() => setCurrentUser(user)}>Delete</Button>
+                      <Button
+                        className="bg-red-600"
+                        onClick={() => {
+                          setCurrentUser(user);
+                          setIsDeleteOpen(true);
+                        }}
+                      >
+                        Delete
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the user
-                          and remove their data from our servers.
+                          This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={handleDelete}>
+                          Delete
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -355,5 +428,5 @@ export default function UsersPage() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
