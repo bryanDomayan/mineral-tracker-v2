@@ -15,7 +15,7 @@ datasource db {
 
 model Users {
     id            Int             @id             @default(autoincrement())
-    firstName      String?
+    firstName     String?
     lastName      String?
     email         String          @unique
     password      String
@@ -53,11 +53,12 @@ model Consumes {
     userId                  Int
     departmentId            Int
     note                    String?
-    avgTempId               Int?
+    tempId                  Int?
     createdAt               DateTime                @default(now())
+
     User                    Users                   @relation(fields: [userId], references: [id])
     Department              Departments             @relation(fields: [departmentId], references: [id])
-    AverageTemperatures     AverageTemperatures?    @relation(fields: [avgTempId], references: [id])
+    Temperature             Temperatures?           @relation(fields: [tempId], references: [id])
     ConsumeMinerals         ConsumeMinerals[]
 }
 
@@ -66,24 +67,18 @@ model ConsumeMinerals {
     consumeId     Int
     mineralId     Int?
     amount        Int
+
     Consume       Consumes        @relation(fields: [consumeId], references: [id])
     Mineral       Minerals?       @relation(fields: [mineralId], references: [id])
 }
 
 model Temperatures {
     id                      Int                     @id             @default(autoincrement())
-    temp                    String
+    average                 Float
+    temps                   Json?
     createdAt               DateTime                @default(now())
-    avgTempId               Int?
-    AverageTemperature      AverageTemperatures?    @relation(fields: [avgTempId], references: [id])
-}
 
-model AverageTemperatures {
-    id              Int             @id             @default(autoincrement())
-    average         String
-    createdAt       DateTime        @default(now())
-    Consumes        Consumes[]
-    Temperatures    Temperatures[]
+    Consumes                Consumes[]
 }
 
 enum UserType {
