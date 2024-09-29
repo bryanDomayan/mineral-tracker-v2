@@ -22,9 +22,11 @@ model Users {
     userType      UserType?       @default(USER)
     createdAt     DateTime        @default(now())
     departmentId  Int?
+
     Department    Departments?    @relation(fields: [departmentId], references: [id])
     Minerals      Minerals[]
     Consumes      Consumes[]
+    Suggestions   Suggestions[]
 }
 
 model Departments {
@@ -54,6 +56,7 @@ model Consumes {
     departmentId            Int
     note                    String?
     tempId                  Int?
+    totalConsumed           Int? // in ml
     createdAt               DateTime                @default(now())
 
     User                    Users                   @relation(fields: [userId], references: [id])
@@ -79,6 +82,19 @@ model Temperatures {
     createdAt               DateTime                @default(now())
 
     Consumes                Consumes[]
+}
+
+model Suggestions {
+    id                      Int                     @id             @default(autoincrement())
+    userId                  Int
+    name                    String
+    brand                   String?             
+    description             String?
+    size                    String?
+    approve                 Boolean                 @default(false)
+    createdAt               DateTime                @default(now())
+
+    User                    Users                   @relation(fields: [userId], references: [id])
 }
 
 enum UserType {

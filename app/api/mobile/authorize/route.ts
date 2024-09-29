@@ -32,7 +32,7 @@ export async function GET(req: Request) {
             return Response.json(copy)
         }
         return Response.json("Session expired", { status: 401 })
-    } catch (error) {
-        return Response.json(error, { status: 500 })
+    } catch (error:any) {
+        return Response.json(error?.message || error, { status: error?.statusCode || 500 })
     }
 }
