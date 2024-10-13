@@ -11,11 +11,12 @@ generator client {
 datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
 model Users {
     id            Int             @id             @default(autoincrement())
-    firstName     String?
+    firstName      String?
     lastName      String?
     email         String          @unique
     password      String
@@ -27,6 +28,7 @@ model Users {
     Minerals      Minerals[]
     Consumes      Consumes[]
     Suggestions   Suggestions[]
+    Stocks        Stocks[]
 }
 
 model Departments {
@@ -44,10 +46,24 @@ model Minerals {
     brand               String?             
     description         String?
     size                String?
+    image               String?
     createdAt           DateTime            @default(now())
     userId              Int?
     User                Users?              @relation(fields: [userId], references: [id])  
     ConsumeMinerals     ConsumeMinerals[]
+    Stocks              Stocks[]
+}
+
+model Stocks {
+    id                  Int                 @id             @default(autoincrement())
+    quantity            Int
+    mineralId           Int
+    userId              Int
+    createdAt           DateTime            @default(now())
+    updatedAt           DateTime?
+
+    User                Users               @relation(fields: [userId], references: [id])
+    Mineral             Minerals            @relation(fields: [mineralId], references: [id])
 }
 
 model Consumes {
