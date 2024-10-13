@@ -4,8 +4,9 @@ import dayjs from "dayjs"
 
 export async function POST(req: Request) {
     try {
+        const session = await mobileSession(req)
         const body = await req.json()
-        const { userId, departmentId, note, minerals } = body
+        const { note, minerals } = body
 
         const tempToday = await prisma.temperatures.findFirst({
             where: {
@@ -18,20 +19,38 @@ export async function POST(req: Request) {
 
         const consume = await prisma.consumes.create({
             data: {
-                userId: userId,
-                departmentId: departmentId,
+                userId: session?.id as number,
+                departmentId: session?.departmentId as number,
                 note: note,
                 tempId: tempToday?.id || null
             }
         })
 
         const consumeMinerals = await Promise.all(minerals.map(async (d: any) => {
-            if (d?.value) {
-                return prisma.consumeMinerals.create({
+            if (d?.quantity) {
+                const stock = await prisma.stocks.findFirst({
+                    where: {
+                        userId: session?.id as number,
+                        mineralId: d.mineralId
+                    }
+                })
+
+                if (stock && stock.quantity > 0) {
+                    const remaining = stock.quantity - (parseInt(d?.quantity))
+                    await prisma.stocks.update({
+                        where: { id: stock.id },
+                        data: {
+                            quantity: remaining > 0 ? remaining : 0,
+                            updatedAt: dayjs().toDate()
+                        }
+                    })
+                }
+
+                return await prisma.consumeMinerals.create({
                     data: {
                         consumeId: consume.id,
                         mineralId: d.mineralId,
-                        amount: parseFloat(d.value as string),
+                        amount: parseFloat(d.quantity as string),
                     },
                 });
             }
