@@ -39,11 +39,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { PieGraph } from "./PieGraph";
-import { PieGraph2 } from "./PieGraph2";
-import { Rangepicker } from "./Rangepicker";
-import { Bargraph } from "./BarChart";
-import { Bargraph2 } from "./BarChart2";
+import { PieGraph } from "@/components/Report/PieGraph";
+import { PieGraph2 } from "@/components/Report/PieGraph2";
+import { Rangepicker } from "@/components/Report/Rangepicker";
+import { Bargraph } from "@/components/Report/BarChart";
+import { Bargraph2 } from "@/components/Report/BarChart2";
 
 const invoices = [
   {
