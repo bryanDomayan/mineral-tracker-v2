@@ -47,7 +47,10 @@ export async function GET(req: Request) {
 
         const stocks = await prisma.stocks.findMany({
             where: {
-                userId: session?.id as number
+                userId: session?.id as number,
+                quantity: {
+                    gte: 1
+                }
             },
             include: {
                 Mineral: true

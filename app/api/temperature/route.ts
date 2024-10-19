@@ -1,11 +1,20 @@
 import { prisma } from "@/lib/prisma"
 import dayjs from "dayjs"
+import { NextRequest } from "next/server"
 
 /**
  * This api should be trigger/call only every 5pm for accuratae temperature
  */
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     try {
+
+        // const { searchParams } = req.nextUrl
+        // const date = searchParams.get("data")
+
+        if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+            return Response.json("Unauthorized", { status: 401 })
+        }
+
         // temperature api for nwssu coordinate location
         const api_url = 'https://api.open-meteo.com/v1/forecast?latitude=12.071826213332008&longitude=124.59673724872216&hourly=temperature_2m&forecast_days=1&timezone=Asia%2FSingapore'
 
@@ -74,7 +83,8 @@ export async function GET(req: Request) {
             }))
         }
         
-        return Response.json("Temperature successfully created.")
+        return Response.json({ ok: true });
+        // return Response.json("Temperature successfully created.")
     } catch (error) {
         return Response.json(error, { status: 500 })
     }
