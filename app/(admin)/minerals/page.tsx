@@ -23,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { getMineral, create, update, deleteDepartment } from "@/actions/minerals";
 import { displaySize } from "@/utils/string";
+import ImageUpload from "@/components/ImageUpload";
+import { Image, ImageOff } from "lucide-react";
 
 // Types
 interface Mineral {
@@ -31,6 +33,7 @@ interface Mineral {
   brand?: string;
   description?: string;
   size?: string;
+  image?: string
 }
 
 export default function MineralsPage() {
@@ -44,6 +47,7 @@ export default function MineralsPage() {
     brand: "",
     description: "",
     size: "",
+    image: ""
   });
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -172,6 +176,14 @@ export default function MineralsPage() {
                     className="col-span-2 h-8"
                   />
                 </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label htmlFor="size">Image:</Label>
+                  <ImageUpload 
+                    onLoading={() => setLoading(true)}
+                    image={formData.image || undefined}
+                    onFinish={(val) => { setLoading(false), handleFieldChange(val, "image") }}
+                  />
+                </div>
                 <div className="w-full flex justify-end p-3">
                   <Button
                     onClick={editMode ? handleUpdate : handleCreate}
@@ -212,7 +224,19 @@ export default function MineralsPage() {
         <TableBody>
           {data.map((mineral) => (
             <TableRow key={mineral.id}>
-              <TableCell className="font-medium">{mineral.name}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-1">
+                    {mineral?.image ? (
+                        <img 
+                            className="h-10 w-10 object-center object-contain"
+                            src={mineral?.image}
+                        />
+                    ) : (
+                        <ImageOff className="text-gray-300" size={34} />
+                    )}
+                    {mineral.name}
+                </div>
+              </TableCell>
               <TableCell>{mineral.brand}</TableCell>
               <TableCell>{mineral.description}</TableCell>
               <TableCell>{displaySize(mineral.size)}</TableCell>
@@ -235,6 +259,7 @@ export default function MineralsPage() {
                             brand: mineral.brand || "",
                             description: mineral.description || "",
                             size: mineral.size || "",
+                            image: mineral.image || ""
                           });
                         }}
                       >
@@ -285,6 +310,14 @@ export default function MineralsPage() {
                               className="col-span-2 h-8"
                             />
                           </div>
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="size">Image:</Label>
+                            <ImageUpload 
+                                onLoading={() => setLoading(true)}
+                                image={formData.image || undefined}
+                                onFinish={(val) => { setLoading(false), handleFieldChange(val, "image") }}
+                            />
+                            </div>
                           <div className="w-full flex justify-end p-3">
                             <Button
                               onClick={handleUpdate}
