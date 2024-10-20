@@ -80,3 +80,29 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         return Response.json(error?.message || error, { status: error?.statusCode || 500 })
     }
 }
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const consume = await prisma.consumes.findUnique({
+            where: { id: parseInt(params.id) }
+        })
+
+        if (consume) {
+            await prisma.consumeMinerals.deleteMany({
+                where: {
+                    consumeId: consume.id
+                }
+            })
+
+            await prisma.consumes.delete({
+                where: { id: consume.id }
+            })
+
+            return Response.json(consume)
+        }
+
+        return Response.json("Failed to delete consumption", { status: 400 })
+    } catch (error:any) {
+        return Response.json(error?.message || error, { status: error?.statusCode || 500 })
+    }
+}
