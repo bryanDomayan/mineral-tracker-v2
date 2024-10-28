@@ -38,7 +38,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getMineralStockOfDepartment } from "@/actions/minerals";
+import { useParams } from "next/navigation";
 
 const invoices = [
   {
@@ -86,7 +88,19 @@ const invoices = [
 ];
 
 export default function MineralsPageByDepartment() {
-  const [position, setPosition] = useState("bottom");
+  const { id } = useParams();
+  const [data, setData] = useState<any>();
+  const fetchData = async () => {
+    const mineralStockData = await getMineralStockOfDepartment(Number(id));
+    console.log(data);
+    setData(mineralStockData);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  console.log("DATA", data);
 
   return (
     <div className=" flex  w-full h-screen items-center justify-center px-10 flex-col">
@@ -113,13 +127,22 @@ export default function MineralsPageByDepartment() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invoices.map((invoice) => (
-            <TableRow key={invoice.invoice}>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
+          {data?.Stocks?.map((data: any) => (
+            <TableRow key={data.id}>
+              <TableCell className="font-medium">
+                <img width={20} src={data.Mineral?.image} />
+              </TableCell>
+              <TableCell className="font-medium">
+                {data.Mineral?.name}
+              </TableCell>
+              <TableCell className="font-medium">
+                {data.Mineral?.brand}
+              </TableCell>
+
+              <TableCell className="font-medium">
+                {data.Mineral?.description}
+              </TableCell>
+              <TableCell className="font-medium">{data?.quantity}</TableCell>
             </TableRow>
           ))}
         </TableBody>

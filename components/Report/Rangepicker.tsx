@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CalendarIcon } from "@radix-ui/react-icons";
-import { addDays, format } from "date-fns";
+import { addMonths, startOfMonth, endOfMonth, format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -13,14 +13,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { CircleX } from "lucide-react";
 
-export function Rangepicker({
-  className,
-}: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
-  });
+interface RangepickerProps {
+  className?: string;
+  date: DateRange | undefined;
+  setDate: (date: DateRange | undefined) => void;
+}
+
+export function Rangepicker({ className, date, setDate }: RangepickerProps) {
+  const now = new Date();
+  const currentMonthStart = startOfMonth(now);
+  const nextMonthEnd = endOfMonth(addMonths(now, 1));
+
+  const clearDateRange = () => {
+    setDate(undefined);
+  };
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -33,6 +41,7 @@ export function Rangepicker({
               "w-[300px] justify-start text-left font-normal",
               !date && "text-muted-foreground"
             )}
+            aria-label="Select date range"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
@@ -47,13 +56,23 @@ export function Rangepicker({
             ) : (
               <span>Pick a date</span>
             )}
+            {date && (
+              <Button
+                variant="outline"
+                className="ml-2 h-2 w-10"
+                onClick={clearDateRange}
+                aria-label="Clear date range"
+              >
+                <CircleX className="text-red-500 font-bolder h-3 w-4" />
+              </Button>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date?.from}
+            defaultMonth={currentMonthStart}
             selected={date}
             onSelect={setDate}
             numberOfMonths={2}

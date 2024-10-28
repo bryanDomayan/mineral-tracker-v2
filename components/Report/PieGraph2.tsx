@@ -7,61 +7,72 @@ import { Label, Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-];
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig;
+interface DepartmentData {
+  departmentId: number;
+  name: string;
+  information: string;
+  totalConsumed: number;
+}
 
-export function PieGraph2() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
+export function PieGraph2({ data = [] }: { data?: DepartmentData[] }) {
+  // Prevent map error when data is empty
+  if (data.length === 0) {
+    return <div>No data available</div>; // or a suitable placeholder
+  }
+
+  // Map the real data into the format needed for the chart
+  const chartData = data.map((department) => ({
+    browser: department.name,
+    visitors: department.totalConsumed,
+    fill: `var(--color-${department.name.toLowerCase()})`,
+  }));
+
+  // Sort the chart data in descending order and slice the top 5 departments
+  const topDepartments = React.useMemo(() => {
+    return chartData.sort((a, b) => b.visitors - a.visitors).slice(0, 5);
+  }, [chartData]);
+
+  // Create a configuration for the chart
+  const chartConfig: Record<string, { label: string; color: string }> = {
+    visitors: {
+      label: "Visitors",
+    } as any,
+    ...topDepartments.reduce((acc, department, index) => {
+      acc[department.browser.toLowerCase()] = {
+        label: department.browser,
+        color: `hsl(var(--chart-${index + 1}))`,
+      };
+      return acc;
+    }, {} as Record<string, { label: string; color: string }>),
+  };
+
+  // Find the highest number of visitors among the top departments
+  const highestVisitors = React.useMemo(() => {
+    return Math.max(...topDepartments.map((department) => department.visitors));
+  }, [topDepartments]);
+
+  // Find the name of the department with the highest visitors
+  const highestDepartment = React.useMemo(() => {
+    const departmentWithHighest = topDepartments.find(
+      (department) => department.visitors === highestVisitors
+    );
+    return departmentWithHighest ? departmentWithHighest.browser : "";
+  }, [highestVisitors, topDepartments]);
 
   return (
     <Card className="flex flex-col bg-transparent ">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        {" "}
+        Top 5 departments with the highest water consumption{" "}
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -74,7 +85,7 @@ export function PieGraph2() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData}
+              data={topDepartments}
               dataKey="visitors"
               nameKey="browser"
               innerRadius={60}
@@ -95,14 +106,14 @@ export function PieGraph2() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {highestVisitors.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          {highestDepartment}
                         </tspan>
                       </text>
                     );
@@ -115,10 +126,8 @@ export function PieGraph2() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+          {highestDepartment} is the highest consumption
+          <TrendingUp className="h-4 w-4" />
         </div>
       </CardFooter>
     </Card>

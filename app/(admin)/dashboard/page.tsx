@@ -1,92 +1,71 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import {
-  getDepartmentCount,
-  getMineralCount,
-  getUserCount,
-} from "@/actions/dashboard";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { getMineral } from "@/actions/minerals";
+import { getDashboardData } from "@/actions/dashboard";
 
-const Page = () => {
-  const { toast } = useToast();
-  const [users, setUsers] = useState<number>(0);
-  const [departments, setDepartments] = useState<number>(0);
-  const [minerals, setMinerals] = useState<number>(0);
-  const [data, setdata] = useState<any>();
-
-  const fetchCounts = async () => {
-    try {
-      const userCount = await getUserCount();
-      setUsers(userCount);
-
-      const departmentCount = await getDepartmentCount();
-      setDepartments(departmentCount);
-
-      const mineralCount = await getMineralCount();
-      setMinerals(mineralCount);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch data",
-        variant: "destructive",
-      });
-    }
-    const minerals = await getMineral();
-    setdata(minerals);
-  };
+const Dashboard = () => {
+  const [dashBoardData, setDashboardData] = useState<any>();
 
   useEffect(() => {
-    fetchCounts();
+    const fetchData = async () => {
+      const dashboardData = await getDashboardData();
+      setDashboardData(dashboardData);
+    };
+
+    fetchData();
   }, []);
 
-  console.log("5555", data);
+  console.log("DASHBOARD ", dashBoardData);
 
   return (
-    <div className="flex w-full flex-col h-screen items-start justify-center p-36">
-      <div className="w-full items-start flex justify-between p-10 pt-0 pl-4 mb-20">
-        <p className="text-teal-700 font-bold shadow-sm drop-shadow-sm underline-offset-1 underline text-3xl">
-          Dashboard
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-20 w-full h-full">
-        <Card className="shadow-sm drop-shadow-sm cursor-pointer border-[#f1986b] border-4 bg-teal-900 flex flex-col items-center justify-center gap-4 w-full h-full">
-          <Label className="cursor-pointer tracking-widest text-white font-extrabold text-2xl">
-            Users
-          </Label>
-          <Label className="cursor-pointer tracking-widest text-orange-600 font-extrabold text-2xl">
-            {users}
-          </Label>
-        </Card>
-        <Card className="shadow-sm drop-shadow-sm cursor-pointer border-[#f1986b] border-4 bg-teal-600 flex flex-col items-center justify-center gap-4 w-full h-full">
-          <Label className="cursor-pointer tracking-widest text-white font-extrabold text-2xl">
-            Department
-          </Label>
-          <Label className="cursor-pointer tracking-widest text-orange-600 font-extrabold text-2xl">
-            {departments}
-          </Label>
-        </Card>
-        <Card className="shadow-sm drop-shadow-sm cursor-pointer border-[#f1986b] border-4 bg-teal-700 flex flex-col items-center justify-center gap-4 w-full h-full">
-          <Label className="cursor-pointer tracking-widest text-white font-extrabold text-2xl">
-            Minerals
-          </Label>
-          <Label className="cursor-pointer tracking-widest text-orange-600 font-extrabold text-2xl">
-            {minerals}
-          </Label>
-        </Card>
-        <Card className="shadow-sm drop-shadow-sm cursor-pointer border-[#f1986b] border-4 bg-teal-800 flex flex-col items-center justify-center gap-4 w-full h-full">
-          <Label className="cursor-pointer tracking-widest text-white font-extrabold text-2xl">
-            Temperature Today
-          </Label>
-          <Label className="cursor-pointer tracking-widest text-orange-600 font-extrabold text-2xl">
-            59 °C
-          </Label>
-        </Card>
+    <div className="container mx-auto px-4 py-10 cursor-pointer">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14 m-1">
+        {/* Mineral Count */}
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-bold">Mineral Count</h2>
+          <p className="text-2xl">{dashBoardData?.mineralCount}</p>
+        </div>
+
+        {/* User Count */}
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-bold">User Count</h2>
+          <p className="text-2xl">{dashBoardData?.userCount}</p>
+        </div>
+
+        {/* Department Count */}
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-bold">Department Count</h2>
+          <p className="text-2xl">{dashBoardData?.departmentCount}</p>
+        </div>
+
+        {/* Sun Temperature Today */}
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-bold">Sun Temperature Today</h2>
+          <p className="text-2xl">25.5</p>
+        </div>
+
+        {/* Mineral Consume Today */}
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-bold">Mineral Consume Today</h2>
+          <p className="text-2xl">
+            {((dashBoardData?.totalConsumedToday || 0) / 1000).toFixed(4)} m³
+            <br />({" "}
+            {((dashBoardData?.totalConsumedToday || 0) / 1000).toFixed(4)} L)
+          </p>
+        </div>
+
+        {/* Total Mineral Consume */}
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <h2 className="text-xl font-bold">Total Mineral Consume</h2>
+          <p className="text-2xl">
+            {((dashBoardData?.totalConsumedAllTime || 0) / 1000).toFixed(4)} m³
+            <br />({" "}
+            {((dashBoardData?.totalConsumedAllTime || 0) / 1000).toFixed(4)} L)
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Page;
+export default Dashboard;

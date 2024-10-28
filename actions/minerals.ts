@@ -70,3 +70,44 @@ export const deleteDepartment = async (id: menaralId, path?: string) => {
     return error;
   }
 };
+
+export const getMineralStockOfDepartment = async (departmentId: number) => {
+  return await prisma.users.findFirst({
+    where: {
+      departmentId: departmentId,
+    },
+    select: {
+      departmentId: true,
+      Stocks: {
+        include: {
+          Mineral: true,
+        },
+      },
+    },
+    orderBy: { id: "desc" },
+  });
+};
+
+export const getSuggestion = async () => {
+  return await prisma.suggestions.findMany({
+    orderBy: { id: "desc" },
+    include: {
+      User: {
+        select: {
+          firstName: true,
+          Department: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+export const updateSuggestionStatus = async (id: string, approve: boolean) => {
+  return await prisma.suggestions.update({
+    where: { id: Number(id) },
+    data: { approve },
+  });
+};

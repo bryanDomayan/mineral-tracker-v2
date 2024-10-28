@@ -3,6 +3,7 @@
 import * as React from "react";
 import { TrendingUp } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
+import { format } from "date-fns"; // for formatting dates
 
 import {
   Card,
@@ -18,50 +19,52 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-];
 
+// Example chartConfig (for customizing colors, labels, etc.)
 const chartConfig = {
   visitors: {
-    label: "Visitors",
+    label: "Average Temp",
   },
-  chrome: {
-    label: "Chrome",
+  week1: {
+    label: "Week 1",
     color: "hsl(var(--chart-1))",
   },
-  safari: {
-    label: "Safari",
+  week2: {
+    label: "Week 2",
     color: "hsl(var(--chart-2))",
   },
-  firefox: {
-    label: "Firefox",
+  week3: {
+    label: "Week 3",
     color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
   },
 } satisfies ChartConfig;
 
-export function PieGraph() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
+export function PieGraph({ temperatureInWeek }: { temperatureInWeek: any[] }) {
+  console.log("TEMPERATURE", temperatureInWeek);
+
+  // Fallback to an empty array if temperatureInWeek is undefined or null
+  const validData = temperatureInWeek || [];
+
+  // Map temperature data into chart-compatible format based on createdAt date
+  const chartData = validData.map((week: any, index: number) => ({
+    createdAt: format(new Date(week.createdAt), "MMM dd"), // Format createdAt date
+    averageTemp: week.average,
+    fill: `hsl(var(--chart-${index + 1}))`, // dynamically assign colors
+  }));
+
+  // Calculate total average temperature over the data points
+  const totalAverageTemp = React.useMemo(() => {
+    if (chartData.length === 0) return 0; // handle division by zero case
+    return (
+      chartData.reduce((acc: any, curr: any) => acc + curr.averageTemp, 0) /
+      chartData.length
+    );
+  }, [chartData]);
 
   return (
-    <Card className="flex flex-col bg-transparent ">
+    <Card className="flex flex-col bg-transparent">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Sun Temperature for this week</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -75,8 +78,8 @@ export function PieGraph() {
             />
             <Pie
               data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
+              dataKey="averageTemp"
+              nameKey="createdAt"
               innerRadius={60}
               strokeWidth={5}
             >
@@ -95,14 +98,14 @@ export function PieGraph() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {totalAverageTemp.toFixed(1)}°C
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Avg Temp for this week
                         </tspan>
                       </text>
                     );
@@ -113,14 +116,6 @@ export function PieGraph() {
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
     </Card>
   );
 }

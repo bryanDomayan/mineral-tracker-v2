@@ -9,6 +9,7 @@ import {
   ChartLine,
   Milk,
   ThermometerSun,
+  Box,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -39,6 +40,12 @@ export default function Sidebar() {
       name: "Minerals",
       path: "/minerals",
       icon: Milk,
+    },
+
+    {
+      name: "Suggestion",
+      path: "/suggestion",
+      icon: Box,
     },
     {
       name: "Reports and statistics",

@@ -61,21 +61,27 @@ interface User {
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
   const [departments, setDepartments] = useState<Departments[]>([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [editUserId, setEditUserId] = useState<number | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [id, setId] = useState<boolean>(false);
+
   const { toast } = useToast();
 
+  console.log("EDIT USER ID ", editUserId);
   const fetchUsers = async () => {
     try {
       const fetchedUsers = await getUsers();
       setUsers(fetchedUsers as User[]);
+      setFilteredUsers(fetchedUsers as User[]);
       const fetchedDepartments = await getDepartmentOption();
       setDepartments(fetchedDepartments as Departments[]);
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to fetch users",
@@ -88,6 +94,18 @@ export default function UsersPage() {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase();
+    const filtered = users.filter((user) =>
+      Object.values(user).some(
+        (value) =>
+          typeof value === "string" &&
+          value.toLowerCase().includes(lowercasedFilter)
+      )
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
+
   const handleAdd = async (formData: FormData) => {
     try {
       const newUser = {
@@ -98,14 +116,17 @@ export default function UsersPage() {
         password: "password",
         departmentId: Number(formData.get("departmentId")),
       };
-      await create(newUser);
+
+      const addedUser = await create(newUser);
+      setUsers((prev) => [...prev, addedUser]);
+      setFilteredUsers((prev) => [...prev, addedUser]);
       setIsAddOpen(false);
-      fetchUsers();
       toast({
         title: "Success",
         description: "User added successfully",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to add user",
@@ -115,24 +136,39 @@ export default function UsersPage() {
   };
 
   const handleEdit = async (formData: FormData) => {
-    if (!currentUser) return;
+    console.log("HEHEHE", editUserId);
+
+    if (editUserId === null) return;
+
     try {
       const updatedUser = {
         firstName: formData.get("firstName") as string,
         lastName: formData.get("lastName") as string,
         email: formData.get("email") as string,
-        userType: currentUser.userType,
+        userType:
+          users.find((u) => u.id === editUserId)?.userType || UserType.USER,
         password: "password",
         departmentId: Number(formData.get("departmentId")),
       };
-      await update(currentUser.id, updatedUser, "/users");
-      setIsEditOpen(false);
-      fetchUsers();
+      await update(editUserId, updatedUser, "/users");
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === editUserId ? { ...user, ...updatedUser } : user
+        )
+      );
+      setFilteredUsers((prev) =>
+        prev.map((user) =>
+          user.id === editUserId ? { ...user, ...updatedUser } : user
+        )
+      );
+      setEditUserId(null);
+      setId(true);
       toast({
         title: "Success",
         description: "User updated successfully",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to update user",
@@ -142,16 +178,20 @@ export default function UsersPage() {
   };
 
   const handleDelete = async () => {
-    if (!currentUser) return;
+    if (deleteUserId === null) return;
     try {
-      await deleteDepartment({ id: currentUser.id }, "/users");
-      setIsDeleteOpen(false);
-      fetchUsers();
+      await deleteDepartment({ id: deleteUserId }, "/users");
+      setUsers((prev) => prev.filter((user) => user.id !== deleteUserId));
+      setFilteredUsers((prev) =>
+        prev.filter((user) => user.id !== deleteUserId)
+      );
+      setDeleteUserId(null);
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to delete user",
@@ -161,272 +201,266 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="flex w-full h-screen items-center justify-center px-10 flex-col">
-      <div className="w-full items-center flex justify-between p-10 pl-4 mb-20">
-        <p className="text-teal-700 font-bold shadow-sm drop-shadow-sm underline-offset-1 underline text-3xl">
-          User Management
-        </p>
-        <AlertDialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <AlertDialogTrigger asChild>
-            <Button className="bg-gray-700">Add Users</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="sm:max-w-[425px]">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Add User</AlertDialogTitle>
-              <AlertDialogDescription>
-                Fill in the details to add a new user.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAdd(new FormData(e.currentTarget));
-              }}
-            >
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="firstName" className="text-right">
-                    First Name
-                  </Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="lastName" className="text-right">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="departmentId" className="text-right">
-                    Department
-                  </Label>
-                  <Select name="departmentId" defaultValue="">
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel className=" w-72 text-xs">
-                          {departments.length === 0
-                            ? "all department assigned user please add another department"
-                            : "Departments"}{" "}
-                        </SelectLabel>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction type="submit">Add User</AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-      <div className="w-full items-start flex justify-start gap-5 pt-0 pl-4 py-4">
-        <Input
-          placeholder="search users"
-          className="w-48 border border-teal-700"
-        />
-        <Select>
-          <SelectTrigger className="w-[180px] text-xs">
-            <SelectValue placeholder="filter department" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.id.toString()}>
-                  {dept.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      <Table>
-        <TableCaption className="mt-20">A list of Users.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>First Name</TableHead>
-            <TableHead>Last Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell className="font-medium">{user.firstName}</TableCell>
-              <TableCell>{user.lastName}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.Department?.name}</TableCell>
-              <TableCell>
-                <div className="flex gap-4">
-                  <AlertDialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        className="bg-yellow-500"
-                        onClick={() => setCurrentUser(user)}
-                      >
-                        Edit
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="sm:max-w-[425px]">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Edit User</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Update user details.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          handleEdit(new FormData(e.currentTarget));
-                        }}
-                      >
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="firstName" className="text-right">
-                              First Name
-                            </Label>
-                            <Input
-                              id="firstName"
-                              name="firstName"
-                              defaultValue={currentUser?.firstName}
-                              className="col-span-3"
-                              required
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="lastName" className="text-right">
-                              Last Name
-                            </Label>
-                            <Input
-                              id="lastName"
-                              name="lastName"
-                              defaultValue={currentUser?.lastName}
-                              className="col-span-3"
-                              required
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="email" className="text-right">
-                              Email
-                            </Label>
-                            <Input
-                              id="email"
-                              name="email"
-                              type="email"
-                              defaultValue={currentUser?.email}
-                              className="col-span-3"
-                              required
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label
-                              htmlFor="departmentId"
-                              className="text-right"
+    <div className="flex w-full min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full max-w-4xl space-y-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-teal-700 underline underline-offset-2">
+            User Management
+          </h1>
+          <AlertDialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <AlertDialogTrigger asChild>
+              <Button className="bg-gray-700">Add User</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="sm:max-w-[425px]">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Add User</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Fill in the details to add a new user.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAdd(new FormData(e.currentTarget));
+                }}
+              >
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="firstName" className="text-right">
+                      First Name
+                    </Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="lastName" className="text-right">
+                      Last Name
+                    </Label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="email" className="text-right">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="departmentId" className="text-right">
+                      Department
+                    </Label>
+                    <Select name="departmentId" defaultValue="">
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Departments</SelectLabel>
+                          {departments.map((dept) => (
+                            <SelectItem
+                              key={dept.id}
+                              value={dept.id.toString()}
                             >
-                              Department
-                            </Label>
-                            <Select
-                              name="departmentId"
-                              defaultValue={
-                                currentUser?.departmentId?.toString() || ""
-                              }
-                            >
-                              <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Select department" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectLabel>
-                                    {departments.length === 0
-                                      ? "all department assigned user please add another department"
-                                      : "Departments"}{" "}
-                                  </SelectLabel>
-                                  {departments.map((dept) => (
-                                    <SelectItem
-                                      key={dept.id}
-                                      value={dept.id.toString()}
-                                    >
-                                      {dept.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                              {dept.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction type="submit">Add User</AlertDialogAction>
+                </AlertDialogFooter>
+              </form>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+        <div className="w-full">
+          <Input
+            placeholder="Search users"
+            className="w-full sm:w-64 border border-teal-700"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <Table>
+          <TableCaption>A list of users</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>User Type</TableHead>
+              <TableHead>Department</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.firstName}</TableCell>
+                <TableCell>{user.lastName}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.userType}</TableCell>
+                <TableCell>{user.Department?.name || "N/A"}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <AlertDialog
+                      open={editUserId === user.id}
+                      onOpenChange={(open) => !open && id}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          className="bg-blue-700"
+                          onClick={() => setEditUserId(user.id)}
+                        >
+                          Edit
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="sm:max-w-[425px]">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Edit User</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Update user information.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            handleEdit(new FormData(e.currentTarget));
+                          }}
+                        >
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="firstName" className="text-right">
+                                First Name
+                              </Label>
+                              <Input
+                                id="firstName"
+                                name="firstName"
+                                defaultValue={user.firstName}
+                                className="col-span-3"
+                                required
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="lastName" className="text-right">
+                                Last Name
+                              </Label>
+                              <Input
+                                id="lastName"
+                                name="lastName"
+                                defaultValue={user.lastName}
+                                className="col-span-3"
+                                required
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="email" className="text-right">
+                                Email
+                              </Label>
+                              <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                defaultValue={user.email}
+                                className="col-span-3"
+                                required
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label
+                                htmlFor="departmentId"
+                                className="text-right"
+                              >
+                                Department
+                              </Label>
+                              <Select
+                                name="departmentId"
+                                defaultValue={
+                                  user.departmentId?.toString() || ""
+                                }
+                              >
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Select department" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Departments</SelectLabel>
+                                    {departments.map((dept) => (
+                                      <SelectItem
+                                        key={dept.id}
+                                        value={dept.id.toString()}
+                                      >
+                                        {dept.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                        </div>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction type="submit">
+                              Update User
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </form>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <AlertDialog
+                      open={deleteUserId === user.id}
+                      onOpenChange={(open) => !open && setDeleteUserId(null)}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          className="bg-red-700"
+                          onClick={() => setDeleteUserId(user.id)}
+                        >
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the user and remove their data from our
+                            servers.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction type="submit">
-                            Update User
+                          <AlertDialogAction onClick={handleDelete}>
+                            Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
-                      </form>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <AlertDialog
-                    open={isDeleteOpen}
-                    onOpenChange={setIsDeleteOpen}
-                  >
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        className="bg-red-600"
-                        onClick={() => {
-                          setCurrentUser(user);
-                          setIsDeleteOpen(true);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

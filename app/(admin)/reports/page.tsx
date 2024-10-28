@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings } from "lucide-react";
+import { LoaderIcon, Settings } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -38,133 +38,204 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PieGraph } from "@/components/Report/PieGraph";
 import { PieGraph2 } from "@/components/Report/PieGraph2";
 import { Rangepicker } from "@/components/Report/Rangepicker";
 import { Bargraph } from "@/components/Report/BarChart";
+import {
+  getConsumedAndTemperature,
+  getConsumedMinerals,
+  getConsumedMineralsByDeparment,
+  getTemperature,
+} from "@/actions/reports";
+import { log } from "console";
 import { Bargraph2 } from "@/components/Report/BarChart2";
-
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-];
+import { format } from "date-fns";
+import { get } from "@/actions/department";
+import { DateRange } from "react-day-picker";
+import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 
 export default function DepartmentPage() {
+  const now = new Date();
+
+  const currentMonthStart = startOfMonth(now);
+  const nextMonthEnd = endOfMonth(addMonths(now, 1));
   const [position, setPosition] = useState("bottom");
+  const [data, setData] = useState<any>();
+  const [temperatureInWeek, setTemperatureInWeek] = useState<any>();
+  const [consumedTemperature, setConsumedTemperature] = useState<any>();
+  const [department, setDepartment] = useState<any>();
+  const [selectDepartmentValue, setSelectDepartmentValue] = useState<any>();
+
+  const [loading, setLoading] = useState<any>(true);
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: currentMonthStart,
+    to: nextMonthEnd,
+  });
+
+  // getConsumedAndTemperature;
+  const [consumedMineralsByDepartment, setConsumedMineralsByDepartment] =
+    useState<any>();
+
+  const fetchData = async () => {
+    const consumed = await getConsumedMinerals(selectDepartmentValue, date);
+    const weeklyTemperature = await getTemperature();
+    const getConsumedMineralByDepartment = await getConsumedMineralsByDeparment(
+      selectDepartmentValue,
+      date
+    );
+
+    const consumedTemperature = await getConsumedAndTemperature(
+      selectDepartmentValue,
+      date
+    );
+
+    const getDepartment = await get();
+
+    setConsumedTemperature(consumedTemperature);
+    setData(consumed);
+    setTemperatureInWeek(weeklyTemperature);
+    setConsumedMineralsByDepartment(getConsumedMineralByDepartment);
+    setDepartment(getDepartment);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [selectDepartmentValue, date]);
+
+  useEffect(() => {
+    setDate(undefined);
+  }, []);
 
   return (
-    <div className=" w-full h-screen flex flex-col gap-10">
-      <div className="w-full  flex px-10 ">
-        <div className=" flex  w-3/5  items-start justify-start px-10 flex-col">
-          <div className=" w-full items-center   flex  justify-between p-10 pl-4">
-            <p className="  text-teal-700  font-bold shadow-sm drop-shadow-sm  underline-offset-1 underline text-3xl">
-              Reports and Statistics
+    <>
+      {loading ? (
+        <div className=" w-full py-72 flex items-center justify-center">
+          <div className=" flex flex-col   items-center justify-center gap-1">
+            <LoaderIcon className=" animate-spin   text-teal-700" />
+            <p className=" text-teal-700 ml-3 text-xs animate-pulse">
+              Loading..
             </p>
           </div>
-
-          <div className="  flex  items-center gap-4 mt-6 mb-10">
-            <Rangepicker />
-            <Select>
-              <SelectTrigger className="w-[180px]  text-xs">
-                <SelectValue placeholder="filter department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>list of departments</SelectLabel>
-                  <SelectItem value="ALL">ALL</SelectItem>
-                  <SelectItem value="CCIS">CCIS</SelectItem>
-                  <SelectItem value="CET">CET</SelectItem>
-                  <SelectItem value="CAT">CAT</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <Table>
-            <TableCaption className=" mt-20  ">
-              <div className=" flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
-                <Label className=" text-sm">
-                  Total Consume of all deparments
-                </Label>
-                <Label className=" text-3xl">2003 Litters</Label>
+        </div>
+      ) : (
+        <div className=" w-full h-screen flex flex-col gap-10">
+          <div className="w-full  flex px-10 ">
+            <div className=" flex  w-3/5  items-start justify-start px-10 flex-col">
+              <div className=" w-full items-center   flex  justify-between p-10 pl-4">
+                <p className="  text-teal-700  font-bold shadow-sm drop-shadow-sm  underline-offset-1 underline text-3xl">
+                  Reports and Statistics
+                </p>
               </div>
-            </TableCaption>
 
-            <TableHeader>
-              <TableRow>
-                <TableHead className=""> Department</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead></TableHead>
-                <TableHead>Total Water consume in litters</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.invoice}>
-                  <TableCell className="font-medium">
-                    {invoice.invoice}
-                  </TableCell>
-                  <TableCell>{invoice.paymentStatus}</TableCell>
-                  <TableCell></TableCell>
-                  <TableCell>{invoice.paymentStatus}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              <div className="  flex  items-center gap-4 mt-6 mb-10">
+                <Rangepicker date={date} setDate={setDate} />
+                <Select onValueChange={(e) => setSelectDepartmentValue(e)}>
+                  <SelectTrigger className="w-[180px]  text-xs">
+                    <SelectValue placeholder="filter department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>list of departments</SelectLabel>
+                      <SelectItem value={"0"}>ALL</SelectItem>
+                      {department.map((data: any) => {
+                        return (
+                          <SelectItem value={data?.id}>{data.name}</SelectItem>
+                        );
+                      })}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className=" text-teal-700 font-bold   py-5 pl-3 text-xl  mt-10">
+                Total Mineral consume of departments
+              </p>
+
+              <Table>
+                <TableCaption className=" mt-20  ">
+                  <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
+                    <Label className="text-sm">
+                      Total Consume of all departments
+                    </Label>
+                    <Label className="text-3xl">
+                      {`${(data?.totalConsumedAllDepartments / 1000).toFixed(
+                        2
+                      )} L / ${(
+                        data?.totalConsumedAllDepartments / 1000000
+                      ).toFixed(6)} m³`}
+                    </Label>
+                  </div>
+                </TableCaption>
+
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className=""> Department</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead></TableHead>
+                    <TableHead>Total Water consume in litters</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.combinedConsumption?.map((data: any) => (
+                    <TableRow key={data?.id}>
+                      <TableCell className="font-medium">
+                        {data?.name}
+                      </TableCell>
+                      <TableCell>{data?.information}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{data?.totalConsumed}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className=" flex-1 items-start justify-start  mt-32 ">
+              <PieGraph temperatureInWeek={temperatureInWeek} />
+              <PieGraph2 data={data?.combinedConsumption} />
+            </div>
+          </div>
+          <div className="w-full  flex flex-col gap-10 px-10 ">
+            <div className=" flex-1">
+              <Bargraph2 data={consumedTemperature} />
+            </div>
+            <div className=" flex-1">
+              <p className=" text-teal-700 font-bold text-xl  mt-14  mb-5 ml-3">
+                consumed logs of departments
+              </p>
+              <div className="  max-h-[700px] overflow-scroll">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className=""> Department</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead></TableHead>
+                      <TableHead>Total Water consume in litters</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {consumedMineralsByDepartment?.map((data: any) => (
+                      <TableRow key={consumedMineralsByDepartment?.id}>
+                        <TableCell className="font-medium">
+                          {data?.Department?.name}
+                        </TableCell>
+                        <TableCell>{data?.Department?.information}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{data?.totalConsumed}</TableCell>
+                        <TableCell>
+                          {format(new Date(data?.createdAt), "MMMM dd, yyyy")}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className=" flex-1 items-start justify-start  mt-32 ">
-          <PieGraph />
-          <PieGraph2 />
-        </div>
-      </div>
-      <div className="w-full  flex flex-col gap-10 px-10 ">
-        <div className=" flex-1">
-          <Bargraph />
-        </div>
-        <div className=" flex-1">
-          <Bargraph2 />
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

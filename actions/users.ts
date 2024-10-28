@@ -51,8 +51,8 @@ export const deleteDepartment = async (id: userId, path?: string) => {
 
 export const create = async (payload: userType, path?: string) => {
   try {
-    const password = await hashPassword(payload.password as string)
-    payload.password = password
+    const password = await hashPassword(payload.password as string);
+    payload.password = password;
     const data = await prisma.users.create({
       data: payload,
     });
@@ -67,10 +67,8 @@ export const create = async (payload: userType, path?: string) => {
 
 export const update = async (id: number, payload: userType, path?: string) => {
   try {
-    const password = await hashPassword(payload.password as string)
-    payload.password = password
     const data = await prisma.users.update({
-      where: { id },
+      where: { id: Number(id) },
       data: payload,
     });
 
@@ -85,10 +83,5 @@ export const update = async (id: number, payload: userType, path?: string) => {
 export const getDepartmentOption = async () => {
   return await prisma.departments.findMany({
     orderBy: { id: "desc" },
-    where: {
-      Users: {
-        none: {},
-      },
-    },
   });
 };
