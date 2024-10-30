@@ -36,8 +36,11 @@ export async function GET(req: Request) {
                     }
                 }
             })
+            
 
-            const consumes = await prisma.consumes.findMany({
+
+            const total = await prisma.consumes.aggregate({
+                _sum: { totalConsumed: true },
                 where: {
                     userId: session?.id as number,
                     createdAt: {
@@ -45,27 +48,12 @@ export async function GET(req: Request) {
                         lte: dayjs(d).endOf("day").toDate()
                     }
                 },
-                include: {
-                    ConsumeMinerals: {
-                        include: {
-                            Mineral: true
-                        }
-                    }
-                }
             })
-
-            const total = consumes.reduce((acc, d) => {
-                const totalPerConsume = d.ConsumeMinerals.reduce((tpAcc, c) => {
-                    let init = c.amount * (parseInt(c.Mineral?.size as string|| '0'))
-                    return tpAcc + init
-                }, 0)
-                return acc + totalPerConsume
-            }, 0)
 
             return {
                 date: d,
                 average_temperature: temperature?.average || null,
-                total_consumed: total
+                total_consumed: total._sum.totalConsumed
             }
         }))
 

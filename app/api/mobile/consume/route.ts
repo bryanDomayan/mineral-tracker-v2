@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     try {
         const session = await mobileSession(req)
         const body = await req.json()
-        const { note, minerals } = body
+        const { note, minerals }: { note: string, minerals: any[] } = body
 
         const tempToday = await prisma.temperatures.findFirst({
             where: {
@@ -17,12 +17,17 @@ export async function POST(req: Request) {
             }
         })
 
+        const totalConsumed = minerals.reduce((acc, d) => {
+            return acc + (parseFloat(d?.mineralSize as string || "0") * parseFloat(d?.quantity as string ||"0"))
+        }, 0)
+
         const consume = await prisma.consumes.create({
             data: {
                 userId: session?.id as number,
                 departmentId: session?.departmentId as number,
                 note: note,
-                tempId: tempToday?.id || null
+                tempId: tempToday?.id || null,
+                totalConsumed: totalConsumed || 0
             }
         })
 

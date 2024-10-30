@@ -6,8 +6,8 @@ import React, { useState } from 'react'
 
 export default function LoginPage() {
     const router = useRouter()
-    const [email, setEmail] = useState<string>("mark@test.com")
-    const [password, setPassword] = useState<string>("123123123")
+    const [email, setEmail] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
 
     const handleLogin = async () => {

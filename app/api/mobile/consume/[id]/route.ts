@@ -6,11 +6,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     try {
         const session = await mobileSession(req)
         const body = await req.json()
-        const { note, minerals } = body
+        const { note, minerals }: { note: string, minerals: any[] } = body
 
         const consume = await prisma.consumes.findUnique({
             where: { id: parseInt(params.id) }
         })
+
+        const totalConsumed = minerals.reduce((acc, d) => {
+            return acc + (parseFloat(d?.mineralSize as string || "0") * parseFloat(d?.quantity as string ||"0"))
+        }, 0)
 
         const consumeMinerals = await Promise.all(minerals.map(async (d: any) => {
             if (d?.consumeMineralId) {
@@ -52,7 +56,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         await prisma.consumes.update({
             where: { id: consume?.id as number },
             data: {
-                note
+                note,
+                totalConsumed: totalConsumed || 0
             }
         })
 
