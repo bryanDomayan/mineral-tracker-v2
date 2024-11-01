@@ -173,7 +173,7 @@ export default function MineralsPage() {
 
   return (
     <div className="flex w-full min-h-screen items-start justify-start px-4 py-8 sm:px-6 lg:px-8 flex-col">
-      <div className="w-full max-w-5xl mx-auto">
+      <div className="w-full p-10 ">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-teal-700 underline underline-offset-2">
             Minerals

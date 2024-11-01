@@ -18,7 +18,10 @@ const Dashboard = () => {
   console.log("DASHBOARD ", dashBoardData);
 
   return (
-    <div className="container mx-auto px-4 py-10 cursor-pointer">
+    <div className="container mx-auto  py-10 cursor-pointer">
+      <h1 className="text-3xl font-bold text-teal-700 underline underline-offset-2 py-10">
+        DASHBOARD
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-14 m-1">
         {/* Mineral Count */}
         <div className="bg-white p-6 rounded-lg shadow-md text-center">

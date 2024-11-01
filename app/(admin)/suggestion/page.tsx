@@ -38,7 +38,9 @@ export default function Page() {
   console.log("DATA", data);
   return (
     <>
-      <p className="text-3xl p-10"> Mineral Suggestion </p>
+      <h1 className="text-3xl font-bold text-teal-700 underline underline-offset-2 py-10 px-10">
+        Mineral Suggestion
+      </h1>{" "}
       <Table>
         <TableCaption>A list of suggestions.</TableCaption>
         <TableHeader>
