@@ -1,6 +1,7 @@
-import { prisma } from "@/lib/prisma"
-
 export const fetchCache = "force-no-store"
+
+import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
 
 export async function GET(req: Request) {
     try {
@@ -12,6 +13,8 @@ export async function GET(req: Request) {
             headers: { 'Cache-Control': 'no-store' }
         })
     } catch (error) {
-        return Response.json(error, { status: 500 })
+        return NextResponse.json(error, { status: 500 })
     }
 }
+
+export const revalidate = 0;
