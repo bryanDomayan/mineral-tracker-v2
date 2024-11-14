@@ -47,6 +47,7 @@ import {
   getConsumedAndTemperature,
   getConsumedMinerals,
   getConsumedMineralsByDeparment,
+  getPotable,
   getTemperature,
 } from "@/actions/reports";
 import { log } from "console";
@@ -55,6 +56,7 @@ import { format } from "date-fns";
 import { get } from "@/actions/department";
 import { DateRange } from "react-day-picker";
 import { addMonths, startOfMonth, endOfMonth } from "date-fns";
+import dayjs from "dayjs";
 
 export default function DepartmentPage() {
   const now = new Date();
@@ -63,6 +65,7 @@ export default function DepartmentPage() {
   const nextMonthEnd = endOfMonth(addMonths(now, 1));
   const [position, setPosition] = useState("bottom");
   const [data, setData] = useState<any>();
+  const [potable, setPotable] = useState<any>();
   const [temperatureInWeek, setTemperatureInWeek] = useState<any>();
   const [consumedTemperature, setConsumedTemperature] = useState<any>();
   const [department, setDepartment] = useState<any>();
@@ -73,6 +76,8 @@ export default function DepartmentPage() {
     from: currentMonthStart,
     to: nextMonthEnd,
   });
+
+  console.log("PUSANG GALA ", potable);
 
   // getConsumedAndTemperature;
   const [consumedMineralsByDepartment, setConsumedMineralsByDepartment] =
@@ -91,9 +96,12 @@ export default function DepartmentPage() {
       date
     );
 
+    const getPotables = await getPotable();
+
     const getDepartment = await get();
 
     setConsumedTemperature(consumedTemperature);
+    setPotable(getPotables);
     setData(consumed);
     setTemperatureInWeek(weeklyTemperature);
     setConsumedMineralsByDepartment(getConsumedMineralByDepartment);
@@ -232,6 +240,53 @@ export default function DepartmentPage() {
                   </TableBody>
                 </Table>
               </div>
+              <p className=" text-teal-700 font-bold   py-5 pl-3 text-xl  mt-10">
+                POTABLE WATER RECORDS
+              </p>
+
+              <Table>
+                <TableCaption className=" mt-20  ">
+                  <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
+                    <Label className="text-sm">
+                      Total Consume of all departments
+                    </Label>
+                    <Label className="text-3xl">
+                      {`${(data?.totalConsumedAllDepartments / 1000).toFixed(
+                        2
+                      )} L / ${(
+                        data?.totalConsumedAllDepartments / 1000000
+                      ).toFixed(6)} m³`}
+                    </Label>
+                  </div>
+                </TableCaption>
+
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className=""> Date</TableHead>
+                    <TableHead className=""> Department</TableHead>
+                    <TableHead>Cubic Consume</TableHead>
+                    <TableHead></TableHead>
+                    <TableHead>Bill</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {potable?.map((data: any) => (
+                    <TableRow key={data?.id}>
+                      <TableCell>
+                        {data?.date
+                          ? dayjs(data.date).format("MM/DD/YYYY")
+                          : ""}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {data?.Department?.name}
+                      </TableCell>
+                      <TableCell>{data?.cubicConsumed}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{data?.bill}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </div>
         </div>
