@@ -29,6 +29,7 @@ model Users {
     Consumes      Consumes[]
     Suggestions   Suggestions[]
     Stocks        Stocks[]
+    PortableConsumes    PortableConsumes[]
 }
 
 model Departments {
@@ -36,8 +37,10 @@ model Departments {
     name          String
     information   String?
     logoPath      String?
+
     Users         Users[]
     Consumes      Consumes[]
+    PortableConsumes    PortableConsumes[]
 }
 
 model Minerals {
@@ -91,6 +94,21 @@ model ConsumeMinerals {
     Mineral       Minerals?       @relation(fields: [mineralId], references: [id])
 }
 
+model PortableConsumes {
+    id                      Int                     @id             @default(autoincrement())
+    userId                  Int
+    departmentId            Int
+    tempId                  Int?
+    date                    DateTime
+    cubicConsumed           Float
+    bill                    Float
+    createdAt               DateTime                @default(now())
+
+    User                    Users                   @relation(fields: [userId], references: [id])
+    Department              Departments             @relation(fields: [departmentId], references: [id])
+    Temperature             Temperatures?           @relation(fields: [tempId], references: [id])
+}
+
 model Temperatures {
     id                      Int                     @id             @default(autoincrement())
     average                 Float
@@ -98,6 +116,7 @@ model Temperatures {
     createdAt               DateTime                @default(now())
 
     Consumes                Consumes[]
+    PortableConsumes        PortableConsumes[]
 }
 
 model Suggestions {
