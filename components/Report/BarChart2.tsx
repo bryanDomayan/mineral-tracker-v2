@@ -1,7 +1,15 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 import {
   Card,
@@ -29,7 +37,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function Bargraph2({ data }: { data: any }) {
+export function Bargraph2({
+  data: { consumedTemperature, departmentLabel },
+}: {
+  data: { consumedTemperature: any; departmentLabel: string };
+}) {
   const months = [
     { month: "January", temperature: 0, consumption: 0 },
     { month: "February", temperature: 0, consumption: 0 },
@@ -48,8 +60,8 @@ export function Bargraph2({ data }: { data: any }) {
   // Initialize an array to hold the count of entries for average temperature calculation
   const temperatureCounts = new Array(12).fill(0);
 
-  // Iterate through the data
-  data.forEach((entry: any) => {
+  // Iterate through the data (consumedTemperature)
+  consumedTemperature.forEach((entry: any) => {
     const createdAt = new Date(entry.createdAt);
     const monthIndex = createdAt.getMonth(); // Get the month index (0-11)
 
@@ -85,13 +97,13 @@ export function Bargraph2({ data }: { data: any }) {
             </p>
           </CardTitle>
           <CardDescription>
-            Sun and total consumption of all departments
+            Sun and total consumption of {departmentLabel}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
-            <AreaChart
-              data={months}
+            <BarChart
+              data={formattedData}
               margin={{
                 left: 12,
                 right: 12,
@@ -113,27 +125,20 @@ export function Bargraph2({ data }: { data: any }) {
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}
               />
-              <Area
+              <Bar
                 dataKey="consumption"
-                type="monotone"
                 fill="var(--color-consumption)"
-                fillOpacity={0.4}
-                stroke="var(--color-consumption)"
-                // Remove stacking to prevent overlap
-                stackId={undefined}
+                barSize={30}
               />
-              <Area
+              <Bar
                 dataKey="temperature"
-                type="monotone"
                 fill="var(--color-temperature)"
-                fillOpacity={0.4}
-                stroke="var(--color-temperature)"
-                stackId={undefined} // Remove stacking for temperature
+                barSize={30}
               />
-            </AreaChart>
+            </BarChart>
           </ChartContainer>
         </CardContent>
-      </Card>{" "}
+      </Card>
     </>
   );
 }

@@ -57,6 +57,7 @@ import { get } from "@/actions/department";
 import { DateRange } from "react-day-picker";
 import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 import dayjs from "dayjs";
+import * as XLSX from "xlsx";
 
 export default function DepartmentPage() {
   const now = new Date();
@@ -70,14 +71,15 @@ export default function DepartmentPage() {
   const [consumedTemperature, setConsumedTemperature] = useState<any>();
   const [department, setDepartment] = useState<any>();
   const [selectDepartmentValue, setSelectDepartmentValue] = useState<any>();
+  const [selectDepartmentLabel, setSelectDepartmentLabel] = useState<any>();
+
+  console.log("SELECTED DEPARTMET", selectDepartmentValue);
 
   const [loading, setLoading] = useState<any>(true);
   const [date, setDate] = useState<DateRange | undefined>({
     from: currentMonthStart,
     to: nextMonthEnd,
   });
-
-  console.log("PUSANG GALA ", potable);
 
   // getConsumedAndTemperature;
   const [consumedMineralsByDepartment, setConsumedMineralsByDepartment] =
@@ -109,6 +111,22 @@ export default function DepartmentPage() {
     setLoading(false);
   };
 
+  const onSelectChange = (value: string | undefined) => {
+    if (value === "100000") {
+      setSelectDepartmentValue(undefined);
+      setSelectDepartmentLabel(undefined);
+    } else {
+      const selectedDepartment = department.find(
+        (data: any) => data.id === value
+      );
+      if (selectedDepartment) {
+        setSelectDepartmentValue(value);
+        setSelectDepartmentLabel(selectedDepartment.name);
+      }
+    }
+  };
+
+  console.log("SELETEDLABEL", selectDepartmentValue);
   useEffect(() => {
     fetchData();
   }, [selectDepartmentValue, date]);
@@ -116,6 +134,43 @@ export default function DepartmentPage() {
   useEffect(() => {
     setDate(undefined);
   }, []);
+
+  const exportToExcel = () => {
+    const workbook = XLSX.utils.book_new();
+
+    if (data?.combinedConsumption) {
+      const combinedConsumptionWS = XLSX.utils.json_to_sheet(
+        data.combinedConsumption
+      );
+      XLSX.utils.book_append_sheet(
+        workbook,
+        combinedConsumptionWS,
+        "Combined Consumption"
+      );
+    }
+
+    if (consumedMineralsByDepartment) {
+      const consumedMineralsWS = XLSX.utils.json_to_sheet(
+        consumedMineralsByDepartment
+      );
+      XLSX.utils.book_append_sheet(
+        workbook,
+        consumedMineralsWS,
+        "Consumed Minerals"
+      );
+    }
+
+    if (potable) {
+      const potableWS = XLSX.utils.json_to_sheet(potable);
+      XLSX.utils.book_append_sheet(
+        workbook,
+        potableWS,
+        "Potable Water Records"
+      );
+    }
+
+    XLSX.writeFile(workbook, "department_data_export.xlsx");
+  };
 
   return (
     <>
@@ -136,21 +191,26 @@ export default function DepartmentPage() {
                 <p className="  text-teal-700  font-bold shadow-sm drop-shadow-sm  underline-offset-1 underline text-3xl">
                   Reports and Statistics
                 </p>
+                <Button onClick={exportToExcel} className="ml-4">
+                  Export to Excel
+                </Button>
               </div>
 
               <div className="  flex  items-center gap-4 mt-6 mb-10">
                 <Rangepicker date={date} setDate={setDate} />
-                <Select onValueChange={(e) => setSelectDepartmentValue(e)}>
-                  <SelectTrigger className="w-[180px]  text-xs">
+                <Select onValueChange={(e) => onSelectChange(e)}>
+                  <SelectTrigger className="w-[180px] text-xs">
                     <SelectValue placeholder="filter department" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>list of departments</SelectLabel>
-                      <SelectItem value={"0"}>ALL</SelectItem>
+                      <SelectItem value={"100000"}>ALL</SelectItem>
                       {department.map((data: any) => {
                         return (
-                          <SelectItem value={data?.id}>{data.name}</SelectItem>
+                          <SelectItem key={data.id} value={data.id}>
+                            {data.name}
+                          </SelectItem>
                         );
                       })}
                     </SelectGroup>
@@ -158,21 +218,23 @@ export default function DepartmentPage() {
                 </Select>
               </div>
               <p className=" text-teal-700 font-bold   py-5 pl-3 text-xl  mt-10">
-                Total Mineral consume of departments
+                Total Consume of{" "}
+                {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
+                departments
               </p>
 
               <Table>
                 <TableCaption className=" mt-20  ">
                   <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
                     <Label className="text-sm">
-                      Total Consume of all departments
+                      Total Consume of{" "}
+                      {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
+                      departments
                     </Label>
                     <Label className="text-3xl">
-                      {`${(data?.totalConsumedAllDepartments / 1000).toFixed(
-                        2
-                      )} L / ${(
+                      {`${data?.totalConsumedAllDepartments / 1000} L / ${
                         data?.totalConsumedAllDepartments / 1000000
-                      ).toFixed(6)} m³`}
+                      } m³`}
                     </Label>
                   </div>
                 </TableCaption>
@@ -206,11 +268,19 @@ export default function DepartmentPage() {
           </div>
           <div className="w-full  flex flex-col gap-10 px-10 ">
             <div className=" flex-1">
-              <Bargraph2 data={consumedTemperature} />
+              <Bargraph2
+                data={{
+                  consumedTemperature,
+                  departmentLabel: selectDepartmentValue
+                    ? selectDepartmentLabel
+                    : "ALL",
+                }}
+              />
             </div>
             <div className=" flex-1">
               <p className=" text-teal-700 font-bold text-xl  mt-14  mb-5 ml-3">
-                consumed logs of departments
+                Total Consume of{" "}
+                {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
               </p>
               <div className="  max-h-[700px] overflow-scroll">
                 <Table>
@@ -248,14 +318,14 @@ export default function DepartmentPage() {
                 <TableCaption className=" mt-20  ">
                   <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
                     <Label className="text-sm">
-                      Total Consume of all departments
+                      Total Consume of{" "}
+                      {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
+                      departments
                     </Label>
                     <Label className="text-3xl">
-                      {`${(data?.totalConsumedAllDepartments / 1000).toFixed(
-                        2
-                      )} L / ${(
+                      {`${data?.totalConsumedAllDepartments / 1000} L / ${
                         data?.totalConsumedAllDepartments / 1000000
-                      ).toFixed(6)} m³`}
+                      } m³`}
                     </Label>
                   </div>
                 </TableCaption>

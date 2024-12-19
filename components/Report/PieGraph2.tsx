@@ -2,7 +2,16 @@
 
 import * as React from "react";
 import { TrendingUp } from "lucide-react";
-import { Label, Pie, PieChart } from "recharts";
+import {
+  Bar,
+  BarChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 import {
   Card,
@@ -30,43 +39,33 @@ export function PieGraph2({ data = [] }: { data?: DepartmentData[] }) {
   }
 
   // Map the real data into the format needed for the chart
-  const chartData = data.map((department) => ({
-    browser: department.name,
-    visitors: department.totalConsumed,
-    fill: `var(--color-${department.name.toLowerCase()})`,
+  const chartData = data.map((department, index) => ({
+    department: department.name,
+    totalConsumed: department.totalConsumed,
+    fill: `hsl(${(index * 60) % 360}, 70%, 60%)`, // Generate a unique color for each department
   }));
 
   // Sort the chart data in descending order and slice the top 5 departments
   const topDepartments = React.useMemo(() => {
-    return chartData.sort((a, b) => b.visitors - a.visitors).slice(0, 5);
+    return chartData
+      .sort((a, b) => b.totalConsumed - a.totalConsumed)
+      .slice(0, 5);
   }, [chartData]);
 
-  // Create a configuration for the chart
-  const chartConfig: Record<string, { label: string; color: string }> = {
-    visitors: {
-      label: "Visitors",
-    } as any,
-    ...topDepartments.reduce((acc, department, index) => {
-      acc[department.browser.toLowerCase()] = {
-        label: department.browser,
-        color: `hsl(var(--chart-${index + 1}))`,
-      };
-      return acc;
-    }, {} as Record<string, { label: string; color: string }>),
-  };
-
-  // Find the highest number of visitors among the top departments
-  const highestVisitors = React.useMemo(() => {
-    return Math.max(...topDepartments.map((department) => department.visitors));
+  // Find the highest number of totalConsumed among the top departments
+  const highestConsumption = React.useMemo(() => {
+    return Math.max(
+      ...topDepartments.map((department) => department.totalConsumed)
+    );
   }, [topDepartments]);
 
-  // Find the name of the department with the highest visitors
+  // Find the name of the department with the highest consumption
   const highestDepartment = React.useMemo(() => {
     const departmentWithHighest = topDepartments.find(
-      (department) => department.visitors === highestVisitors
+      (department) => department.totalConsumed === highestConsumption
     );
-    return departmentWithHighest ? departmentWithHighest.browser : "";
-  }, [highestVisitors, topDepartments]);
+    return departmentWithHighest ? departmentWithHighest.department : "";
+  }, [highestConsumption, topDepartments]);
 
   return (
     <Card className="flex flex-col bg-transparent ">
@@ -76,52 +75,22 @@ export function PieGraph2({ data = [] }: { data?: DepartmentData[] }) {
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
-          config={chartConfig}
+          config={chartData as any}
           className="mx-auto aspect-square max-h-[250px]"
         >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={topDepartments}
-              dataKey="visitors"
-              nameKey="browser"
-              innerRadius={60}
-              strokeWidth={5}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {highestVisitors.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          {highestDepartment}
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={topDepartments}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="department" />
+              <YAxis />
+              <Tooltip content={<ChartTooltipContent hideLabel />} />
+              <Legend />
+              <Bar
+                dataKey="totalConsumed"
+                fill={topDepartments[0]?.fill || "#8884d8"}
               />
-            </Pie>
-          </PieChart>
+            </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
