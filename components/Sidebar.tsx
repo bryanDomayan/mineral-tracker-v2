@@ -58,7 +58,7 @@ export default function Sidebar() {
     <aside className="w-64 h-screen bg-white fixed top-0 p-4 left-0">
       <div className="bg-teal-800/10 p-2 rounded-lg">
         <h2 className="text-lg tracking-tight capitalize leading-tight font-bold text-gray-600 text-center">
-          PROJECT AI
+          WATER CONSUMPTION TRACKER
         </h2>
       </div>
       <ul className="my-6">

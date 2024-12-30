@@ -58,6 +58,7 @@ import { DateRange } from "react-day-picker";
 import { addMonths, startOfMonth, endOfMonth } from "date-fns";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
+import { PotableWaterGraph } from "@/components/Report/PotableWaterGraph";
 
 export default function DepartmentPage() {
   const now = new Date();
@@ -232,9 +233,11 @@ export default function DepartmentPage() {
                       departments
                     </Label>
                     <Label className="text-3xl">
-                      {`${data?.totalConsumedAllDepartments / 1000} L / ${
+                      {`${Math.floor(
+                        data?.totalConsumedAllDepartments / 1000
+                      )} L / ${(
                         data?.totalConsumedAllDepartments / 1000000
-                      } m³`}
+                      ).toFixed(2)} m³`}
                     </Label>
                   </div>
                 </TableCaption>
@@ -314,7 +317,7 @@ export default function DepartmentPage() {
                 POTABLE WATER RECORDS
               </p>
 
-              <Table>
+              <Table className=" w-full">
                 <TableCaption className=" mt-20  ">
                   <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
                     <Label className="text-sm">
@@ -323,9 +326,11 @@ export default function DepartmentPage() {
                       departments
                     </Label>
                     <Label className="text-3xl">
-                      {`${data?.totalConsumedAllDepartments / 1000} L / ${
+                      {`${Math.floor(
+                        data?.totalConsumedAllDepartments / 1000
+                      )} L / ${(
                         data?.totalConsumedAllDepartments / 1000000
-                      } m³`}
+                      ).toFixed(2)} m³`}
                     </Label>
                   </div>
                 </TableCaption>
@@ -357,6 +362,9 @@ export default function DepartmentPage() {
                   ))}
                 </TableBody>
               </Table>
+              <div className=" w-full">
+                <PotableWaterGraph data={potable} />
+              </div>
             </div>
           </div>
         </div>
