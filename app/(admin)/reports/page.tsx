@@ -233,11 +233,9 @@ export default function DepartmentPage() {
                       departments
                     </Label>
                     <Label className="text-3xl">
-                      {`${Math.floor(
-                        data?.totalConsumedAllDepartments / 1000
-                      )} L / ${(
-                        data?.totalConsumedAllDepartments / 1000000
-                      ).toFixed(2)} m³`}
+                      {`${Math.floor(data?.totalConsumedAllDepartments)} L / ${(
+                        Math.floor(data?.totalConsumedAllDepartments) * 1000
+                      ).toLocaleString()} m³`}
                     </Label>
                   </div>
                 </TableCaption>
@@ -326,11 +324,9 @@ export default function DepartmentPage() {
                       departments
                     </Label>
                     <Label className="text-3xl">
-                      {`${Math.floor(
-                        data?.totalConsumedAllDepartments / 1000
-                      )} L / ${(
-                        data?.totalConsumedAllDepartments / 1000000
-                      ).toFixed(2)} m³`}
+                      {`${Math.floor(data?.totalConsumedAllDepartments)} L / ${(
+                        Math.floor(data?.totalConsumedAllDepartments) * 1000
+                      ).toLocaleString()} m³`}
                     </Label>
                   </div>
                 </TableCaption>
