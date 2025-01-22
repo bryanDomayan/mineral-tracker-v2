@@ -5,10 +5,17 @@ import { hashPassword } from "@/utils/password";
 import { revalidatePath } from "next/cache";
 import { Niramit } from "next/font/google";
 
-export const getPotable = async () => {
+export const getPotable = async (departmentId: number) => {
   return await prisma.portableConsumes.findMany({
     include: {
-      Department: true,
+      Department: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    where: {
+      departmentId: departmentId,
     },
   });
 };

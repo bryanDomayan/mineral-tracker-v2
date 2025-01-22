@@ -74,15 +74,12 @@ export default function DepartmentPage() {
   const [selectDepartmentValue, setSelectDepartmentValue] = useState<any>();
   const [selectDepartmentLabel, setSelectDepartmentLabel] = useState<any>();
 
-  console.log("SELECTED DEPARTMET", selectDepartmentValue);
-
   const [loading, setLoading] = useState<any>(true);
   const [date, setDate] = useState<DateRange | undefined>({
     from: currentMonthStart,
     to: nextMonthEnd,
   });
 
-  // getConsumedAndTemperature;
   const [consumedMineralsByDepartment, setConsumedMineralsByDepartment] =
     useState<any>();
 
@@ -99,7 +96,7 @@ export default function DepartmentPage() {
       date
     );
 
-    const getPotables = await getPotable();
+    const getPotables = await getPotable(selectDepartmentValue);
 
     const getDepartment = await get();
 
@@ -127,7 +124,8 @@ export default function DepartmentPage() {
     }
   };
 
-  console.log("SELETEDLABEL", selectDepartmentValue);
+  console.log("POTABLE ", potable);
+
   useEffect(() => {
     fetchData();
   }, [selectDepartmentValue, date]);
@@ -364,6 +362,23 @@ export default function DepartmentPage() {
               </Table>
               <div className=" w-full">
                 <PotableWaterGraph data={potable} />
+              </div>
+              <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
+                <Label className="text-sm">
+                  Total Water Consumption of{" "}
+                  {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
+                  departments
+                </Label>
+                <Label className="text-3xl">
+                  cubic meters :
+                  {potable && Array.isArray(potable) && potable.length > 0
+                    ? `${potable.reduce(
+                        (sum, item) => sum + (item.cubicConsumed || 0),
+                        0
+                      )} 
+         bill:${potable.reduce((sum, item) => sum + (item.bill || 0), 0)}`
+                    : "No data available"}
+                </Label>
               </div>
             </div>
           </div>
