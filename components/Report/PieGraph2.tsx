@@ -12,7 +12,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
 import {
   Card,
   CardContent,
@@ -33,7 +32,7 @@ interface DepartmentData {
 }
 
 export function PieGraph2({ data = [] }: { data?: DepartmentData[] }) {
-  // Prevent map error when data is empty
+  // Handle empty data gracefully
   if (data.length === 0) {
     return <div>No data available</div>; // or a suitable placeholder
   }
@@ -67,11 +66,13 @@ export function PieGraph2({ data = [] }: { data?: DepartmentData[] }) {
     return departmentWithHighest ? departmentWithHighest.department : "";
   }, [highestConsumption, topDepartments]);
 
+  // Check chart data and labels for debugging
+  console.log("Chart Data:", topDepartments);
+
   return (
-    <Card className="flex flex-col bg-transparent ">
+    <Card className="flex flex-col bg-transparent">
       <CardHeader className="items-center pb-0">
-        {" "}
-        Top 5 departments with the highest water consumption{" "}
+        Top 5 departments with the highest water consumption
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -81,7 +82,11 @@ export function PieGraph2({ data = [] }: { data?: DepartmentData[] }) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={topDepartments}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="department" />
+              <XAxis
+                dataKey="department"
+                tick={{ fontSize: 12 }}
+                interval={0} //
+              />
               <YAxis />
               <Tooltip content={<ChartTooltipContent hideLabel />} />
               <Legend />

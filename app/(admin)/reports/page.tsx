@@ -217,7 +217,7 @@ export default function DepartmentPage() {
                 </Select>
               </div>
               <p className=" text-teal-700 font-bold   py-5 pl-3 text-xl  mt-10">
-                Total Consume of{" "}
+                Total Water Consumption of{" "}
                 {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
                 departments
               </p>
@@ -226,7 +226,7 @@ export default function DepartmentPage() {
                 <TableCaption className=" mt-20  ">
                   <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
                     <Label className="text-sm">
-                      Total Consume of{" "}
+                      Total Water Consumption of{" "}
                       {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
                       departments
                     </Label>
@@ -245,7 +245,7 @@ export default function DepartmentPage() {
                     <TableHead className=""> Department</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead></TableHead>
-                    <TableHead>Total Water consume in litters</TableHead>
+                    <TableHead>Total Water consumption in liters</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -280,8 +280,10 @@ export default function DepartmentPage() {
             </div>
             <div className=" flex-1">
               <p className=" text-teal-700 font-bold text-xl  mt-14  mb-5 ml-3">
-                Total Consume of{" "}
-                {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
+                Total Consumption of{" "}
+                {selectDepartmentValue
+                  ? selectDepartmentLabel
+                  : "ALL Departments"}{" "}
               </p>
               <div className="  max-h-[700px] overflow-scroll">
                 <Table>
@@ -290,7 +292,7 @@ export default function DepartmentPage() {
                       <TableHead className=""> Department</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead></TableHead>
-                      <TableHead>Total Water consume in litters</TableHead>
+                      <TableHead>Total Water consumption in liters</TableHead>
                       <TableHead>Date</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -319,7 +321,7 @@ export default function DepartmentPage() {
                 <TableCaption className=" mt-20  ">
                   <div className="flex flex-col items-center justify-center gap-4 bg-teal-700 text-white p-6">
                     <Label className="text-sm">
-                      Total Consume of{" "}
+                      Total Water Consumption of{" "}
                       {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
                       departments
                     </Label>
@@ -367,7 +369,9 @@ export default function DepartmentPage() {
                 <Label className="text-sm">
                   Total Water Consumption of{" "}
                   {selectDepartmentValue ? selectDepartmentLabel : "ALL"}{" "}
-                  departments
+                  <span className={selectDepartmentValue ? "hidden" : ""}>
+                    departments
+                  </span>
                 </Label>
                 <Label className="text-3xl">
                   cubic meters :

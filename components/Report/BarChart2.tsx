@@ -93,7 +93,8 @@ export function Bargraph2({
         <CardHeader>
           <CardTitle>
             <p className="text-teal-700">
-              Statistics of total mineral consumed based on the heat of the sun
+              Statistics of total mineral consumption based on the heat of the
+              sun
             </p>
           </CardTitle>
           <CardDescription>
